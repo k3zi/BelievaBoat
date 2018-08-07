@@ -5,6 +5,8 @@ module.exports = (async function(client, helpers) {
     const exports = {};
 
     const db = client.db;
+    const Guild = db.model('Guild');
+
     client.on(`message`, async message => {
         client.helpers.log(`event`, `${message.id} → message received`);
         if (message.author.bot) {
@@ -29,7 +31,10 @@ module.exports = (async function(client, helpers) {
             // checks if message contains a command and runs it
             let commandfile = client.commands.get(command);
             if (commandfile) {
-                commandfile.run(client, message, arg);
+                let guild = await Guild.get(message.guild.id);
+                if (guild.can(message.member).execute.command(commandfile).in(message.channel)) {
+                    commandfile.run(client, message, arg);
+                }
             }
         }
     });

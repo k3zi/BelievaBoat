@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
+const _ = require(`lodash`);
 
 module.exports = (async function(client, helpers) {
     const exports = {};
@@ -10,20 +11,11 @@ module.exports = (async function(client, helpers) {
     client.addDeleteWatchForMessage = async function(command, message, sentMessage) {
         let watch = new MessageDeleteWatch({
             command: command,
-            message: {
-                id: message.id,
-                name: message.name
-            },
-            sentMessage: {
-                id: sentMessage.id,
-                channel: {
-                    id: sentMessage.channel.id,
-                    name: sentMessage.channel.name
-                }
-            }
+            message: _.pick(message, [`id`, `name`]),
+            sentMessage: _.pick(sentMessage, [`id`, `channel.id`, `channel.name`]),
         });
 
-        return await watch.save();
+        return watch.save();
     };
 
     client.on(`messageDelete`, async message => {
@@ -44,7 +36,7 @@ module.exports = (async function(client, helpers) {
 
             let channel = await client.channels.get(watchInfo.sentMessage.channel.id);
             let sentMessage = await channel.fetchMessage(watchInfo.sentMessage.id)
-            return await sentMessage.delete();
+            return sentMessage.delete();
         });
     });
 

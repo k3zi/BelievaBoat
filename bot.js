@@ -9,6 +9,7 @@ const util = require(`util`);
 const glob = util.promisify(require(`glob`));
 const client = new Discord.Client();
 
+mongoose.Promise = Promise;
 mongoose.connect(`mongodb://localhost:27017/BelievaBoat`, {
     useNewUrlParser: true
 });

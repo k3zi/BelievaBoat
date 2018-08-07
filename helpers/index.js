@@ -1,7 +1,7 @@
 const helpers = {};
 
-helpers.log = function (category, content) {
-    return console.log(`${category} → ${content}`);
+helpers.log = function (...args) {
+    return console.log(args.join(` → `));
 };
 
 module.exports = helpers;
