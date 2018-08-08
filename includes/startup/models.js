@@ -29,20 +29,25 @@ module.exports = (async function(client, helpers) {
 
             guild.permissions = {
                 everything: {
-                    // user (location) -> action (location) -> location
+                    // user (location) -> location
                     everywhere: true
                 },
                 modules: {
-                    // module -> user (location) -> action (location) -> location
+                    // module -> user (location) -> location
                     moderation: {
                         everywhere: false,
                         permissions: {
                             'ADMINISTRATOR': {
-                                // action (location) -> location
+                                // location
                                 everywhere: true,
-                                /*execute: {
-                                    everywhere: true
-                                }*/
+                            }
+                        }
+                    },
+                    setup: {
+                        everywhere: false,
+                        permissions: {
+                            'ADMINISTRATOR': {
+                                everywhere: true
                             }
                         }
                     }
@@ -58,41 +63,53 @@ module.exports = (async function(client, helpers) {
         return guild;
     };
 
-    let checkUser = function (result, item, member, action, channel) {
+    let checkWhat = function (result, item, member, type, command, channel) {
+        let value = item[type === `modules` ? command.meta.module : command.meta.name];
+
+        if (_.isBoolean(value)) {
+            result = value;
+        } else if (_.isObject(value)) {
+            result = checkUser(result, value, member, channel);
+        }
+
+        return result;
+    };
+
+    let checkUser = function (result, item, member, channel) {
         // item == user level
         result = checkLocation(result, item, channel);
-        
+
         if (_.isObject(item.permissions)) {
-            For (let [key, value] of Object.entries(item.permissions)) {
+            for (let [key, value] of Object.entries(item.permissions)) {
                 if (member.hasPermission(key)) {
                     if (_.isBoolean(value)) {
                         result = value;
-                    } else if (_.isObject(valuie)) {
-                        result = checkAction(result, value, action, channel);
+                    } else if (_.isObject(value)) {
+                        result = checkLocation(result, value, channel);
                     }
                 }
             }
         }
 
         if (_.isObject(item.roles)) {
-            For (let [key, value] of Object.entries(item.roles)) {
+            for (let [key, value] of Object.entries(item.roles)) {
                 if (member.hasRole(key)) {
                     if (_.isBoolean(value)) {
                         result = value;
-                    } else if (_.isObject(valuie)) {
-                        result = checkAction(result, value, action, channel);
+                    } else if (_.isObject(value)) {
+                        result = checkLocation(result, value, channel);
                     }
                 }
             }
         }
 
         if (_.isObject(item.users)) {
-            For (let [key, value] of Object.entries(item.users)) {
+            for (let [key, value] of Object.entries(item.users)) {
                 if (member.id === key) {
                     if (_.isBoolean(value)) {
                         result = value;
-                    } else if (_.isObject(valuie)) {
-                        result = checkAction(result, value, action, channel);
+                    } else if (_.isObject(value)) {
+                        result = checkLocation(result, value, channel);
                     }
                 }
             }
@@ -101,10 +118,6 @@ module.exports = (async function(client, helpers) {
         return result;
     };
 
-    let checkAction = function (result, item, action, channel) {
-        result = checkLocation(result, item, channel);
-
-    };
 
     let checkLocation = function (result, item, channel) {
         if (_.isBoolean(item.everywhere)) {
@@ -117,36 +130,47 @@ module.exports = (async function(client, helpers) {
             }
         }
 
+        if (channel.parentID && _.isObject(item.categories)) {
+            if (_.isBoolean(item.categories[channel.id])) {
+                result = item.categories[channel.parentID];
+            }
+        }
+
         return result;
     };
 
-    let onFunction = function (guild, member, action, channel) {
-        var result = false;
-        let perms = guild.perms;
-        let checkOrder = [`everything`, `modules`, `commands`];
-        let type = action.type;
-        let command = action.value;
+    let onFunction = function (guild, member, command, channel) {
+        if (member.guild.ownerID === member.id) {
+            return true;
+        }
 
-        for (let check of checkOrder) {
-            let item = perms[check];
+        var result = false;
+        let perms = guild.permissions;
+        let checkOrder = [`everything`, `modules`, `commands`];
+
+        for (let type of checkOrder) {
+            let item = perms[type];
             if (_.isBoolean(item)) {
                 result = item;
             } else if (_.isObject(item)) {
-                if (check === `everything`) {
-                    result = checkLocation(result, item, )
+                if (type === `everything`) {
+                    result = checkUser(result, item, member, channel);
+                } else {
+                    result = checkWhat(result, item, member, type, command, channel);
                 }
             }
         }
+
+        return result;
     };
 
     let innerCanFunction = function (target) {
-        console.log(target);
-        return onFunction(target.guild, target.member, target[`#doWhat#`], target.in);
+        return onFunction(target.guild, target.member, target.run, target.in);
     };
 
     guildSchema.methods.can = function (member) {
         // .can.execute.command('').in()
-        var arr = [`#doWhat#`, `$aWhat$`, `in`];
+        var arr = [`run`, `in`];
 
         var proxy = new Proxy ({
              guild: this,
@@ -158,12 +182,9 @@ module.exports = (async function(client, helpers) {
                      return target[thing];
                  } else {
                      let match = arr.shift();
-                     if (match === thing || match.startsWith(`$`)) {
+                     if (match === thing) {
                          return (response) => {
-                            target[match] = match.startsWith(`$`) ? {
-                                type: thing,
-                                value: response
-                            } : response;
+                            target[match] = response;
 
                             if (!arr.length) {
                                 return innerCanFunction(target);
@@ -171,12 +192,6 @@ module.exports = (async function(client, helpers) {
 
                             return proxy;
                         };
-                    }
-
-                    target[match] = thing;
-
-                    if (!arr.length) {
-                        return innerCanFunction(target);
                     }
 
                     return proxy;
@@ -200,40 +215,41 @@ module.exports = (async function(client, helpers) {
         channelID: { type: String, required: true },
         start: { type: Date, default: Date.now },
         duration: { type: Number, default: 0 },
-        onRestart: { type: Boolean, default: false }
+        onRestart: { type: Boolean, default: false },
     }));
 
     db.model(`VoiceChannelSpeakActivity`, new Schema({
         userID: { type: String, required: true },
         channelID: { type: String, required: true },
         start: { type: Date, default: Date.now },
-        duration: { type: Number, default: 0 }
+        duration: { type: Number, default: 0 },
     }));
 
     db.model(`MessageDeleteWatch`, new Schema({
         command: { type: String, required: true },
         message: { type: Schema.Types.Mixed, required: true },
-        sentMessage: { type: Schema.Types.Mixed, required: true }
+        sentMessage: { type: Schema.Types.Mixed, required: true },
+        shard: Number,
     }));
 
     db.model(`QueuedTrack`, new Schema({
         channel: { type: Schema.Types.Mixed, required: true },
         client: { type: Schema.Types.Mixed, required: true },
         member: { type: Schema.Types.Mixed, required: true },
-        track: { type: Schema.Types.Mixed, required: true }
+        track: { type: Schema.Types.Mixed, required: true },
     }));
 
     db.model(`MemberAction`, new Schema({
         type: { type: String, required: true },
         member: { type: Schema.Types.Mixed, required: true },
         points: { type: Number, required: true },
-        date: { type: Date, default: Date.now }
+        date: { type: Date, default: Date.now },
     }));
 
     db.model(`MemberMessageEmoji`, new Schema({
         value: { type: String, required: true },
         member: { type: Schema.Types.Mixed, required: true },
-        date: { type: Date, default: Date.now }
+        date: { type: Date, default: Date.now },
     }));
 
     return exports;

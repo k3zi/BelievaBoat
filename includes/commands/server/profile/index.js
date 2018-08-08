@@ -13,6 +13,7 @@ module.exports = (async function(client, helpers) {
 
     exports.meta = {};
     exports.meta.name = 'profile';
+    exports.meta.aliases = [];
     exports.meta.description = 'Shows info related to the provided user or message author.';
     exports.meta.module = 'server';
     exports.meta.examples = ['profile', 'profile @27'];

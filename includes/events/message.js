@@ -32,8 +32,15 @@ module.exports = (async function(client, helpers) {
             let commandfile = client.commands.get(command);
             if (commandfile) {
                 let guild = await Guild.get(message.guild.id);
-                if (guild.can(message.member).execute.command(commandfile).in(message.channel)) {
-                    commandfile.run(client, message, arg);
+                if (guild.can(message.member).run(commandfile).in(message.channel)) {
+                    let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
+                        let embed = client.helpers.generateErrorEmbed(client, message.member.user, error);
+                        return await message.channel.send({ embed });
+                    });
+
+                    if (sentMessage) {
+                        await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
+                    }
                 }
             }
         }
