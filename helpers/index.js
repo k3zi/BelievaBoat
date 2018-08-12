@@ -11,12 +11,24 @@ helpers.generateErrorEmbed = function (client, user, error) {
     var embed = new Discord.RichEmbed();
     embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
     embed = embed.setDescription(`${client.customEmojis.xmark} ${error}`);
-    embed = embed.setColor([239, 83, 80]);
+    embed = embed.setColor([240, 71, 71]);
+    return embed;
+};
+
+helpers.generateSuccessEmbed = function (client, user, message) {
+    var embed = new Discord.RichEmbed();
+    embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    embed = embed.setDescription(`${client.customEmojis.check} ${message}`);
+    embed = embed.setColor([67, 181, 129]);
     return embed;
 };
 
 helpers.startsWith = function (str1, str2) {
     return str1.substr(0, str2.length).toLowerCase() === str2.toLowerCase();
+};
+
+helpers.joinCode = function (arr, delimiter) {
+    return arr.map(x => `\`` + x + `\``).join(delimiter);
 };
 
 helpers.findUser = async function (guild, value) {

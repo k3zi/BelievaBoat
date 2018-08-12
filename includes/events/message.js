@@ -33,6 +33,7 @@ module.exports = (async function(client, helpers) {
             if (commandfile) {
                 let guild = await Guild.get(message.guild.id);
                 if (guild.can(message.member).run(commandfile).in(message.channel)) {
+                    message.dbGuild = guild;
                     let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
                         let embed = client.helpers.generateErrorEmbed(client, message.member.user, error);
                         return await message.channel.send({ embed });

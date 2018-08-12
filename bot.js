@@ -46,9 +46,16 @@ client.loopUntilBotAvailable = async function(guild) {
 (async () => {
     helpers.log(`startup`, `starting async function`);
 
+    const modelFiles = await glob(`./includes/models/*.js`);
     const startupFiles = await glob(`./includes/startup/*.js`);
     const eventFiles = await glob(`./includes/events/*.js`);
     const commandFiles = await glob(`./includes/commands/**/index.js`);
+
+    await Promise.map(modelFiles, async (f) => {
+        let source = require(f);
+        await source(client, helpers);
+        helpers.log(`startup`, `loaded model file at ${f}`);
+    });
 
     await Promise.map(startupFiles, async (f) => {
         let source = require(f);

@@ -11,16 +11,23 @@ module.exports = (async function(client, helpers) {
     const emojis = client.customEmojis;
     const VoiceChannelJoinActivity = db.model('VoiceChannelJoinActivity');
 
+    const enableItems = [`everything`, `module`, `command`];
+    const enableParameterItems = [`module`, `command`];
+    const forArgTypes = [`user`, `role`, `permission`];
+    // const logTypes = [`delete`, `edit`, `reaction`, `media`, `link`];
+
     exports.meta = {};
     exports.meta.name = 'enable';
     exports.meta.aliases = [];
-    exports.meta.description = `Enable a command or module.\n`
-    + '```enable <everything / module / channel> (for <user / role / permission> <value of previous>) (in <category / channel> <value of previous>)```';
+    exports.meta.description = `Enable something.\n`
+    + '```enable <everything | module [name] | channel [name] | log [name]> (for <user / role / permission> [name | id]) (in <category / channel> [name | id])```';
     exports.meta.module = 'setup';
     exports.meta.examples = ['enable everything for role @Admin', 'enable profile for @Member'];
 
     exports.run = async (client, message, arg) => {
         let member = message.member;
+        let dbGuild = message.dbGuild;
+
         const modules = _.uniq(client.commands.array().map(c => c.meta.module));
 
         let forArg = {
@@ -33,8 +40,6 @@ module.exports = (async function(client, helpers) {
 
         async function parseArgs(args) {
             var forIndex;
-            console.log(args);
-            console.log(args.length);
             if (!forArg.type && (forIndex = args.indexOf(`for`)) >= 0) {
                 if (args.length <= (forIndex + 2)) {
                     throw new Error(`Arguments are missing for the  \`for\` input.`);
@@ -43,8 +48,8 @@ module.exports = (async function(client, helpers) {
                 forArg.type = args[forIndex + 1];
                 forArg.value = args[forIndex + 2];
 
-                if (![`user`, `role`, `permission`].includes(forArg.type)) {
-                    throw new Error(`No valid \`for\` type (\`user\` | \`role\` | \`permission\`) was provided.`);
+                if (!forArgTypes.includes(forArg.type)) {
+                    throw new Error(`No valid \`for\` type: [${helpers.joinCode(forArgTypes, ` | `)}] was provided.`);
                 }
 
                 if (forArg.type === `user`) {
@@ -89,23 +94,97 @@ module.exports = (async function(client, helpers) {
                 }
 
                 if (inArg.type === `category`) {
-                    let user = await client.helpers.findChannelCategory(message.guild, inArg.value);
-                    if (!user) {
+                    let category = await client.helpers.findChannelCategory(message.guild, inArg.value);
+                    if (!category) {
                         throw new Error(`Unable to locate the specified \`category\`. Please use a more exact value such as the user's ID.`);
                     }
 
-                    inArg.value = user;
+                    inArg.value = category;
                 }
 
                 if (inArg.type === `channel`) {
-                    let role = await client.helpers.findChannel(message.guild, inArg.value);
-                    if (!role) {
+                    let channel = await client.helpers.findChannel(message.guild, inArg.value);
+                    if (!channel) {
                         throw new Error(`Unable to locate the specified \`channel\`. Please use a more exact value such as the role's ID.`);
                     }
 
-                    inArg.value = role;
+                    inArg.value = channel;
                 }
             }
+        }
+
+        async function applyLocation(item, enable) {
+            var residingValue;
+
+            if (inArg.type === `category`) {
+                residingValue = item.categories || {};
+                item.categories = residingValue;
+            } else if (inArg.type === `channel`) {
+                residingValue = item.channels || {};
+                item.channels = residingValue;
+            } else if (_.isBoolean(enable)) {
+                item.everywhere = enable;
+                return;
+            } else {
+                delete item.everywhere;
+                return;
+            }
+
+            if (_.isBoolean(enable)) {
+                residingValue[inArg.value.id] = enable;
+            } else {
+                delete residingValue[inArg.value.id];
+            }
+        }
+
+        async function applyUser(item, enable) {
+            var residingValue;
+            var forValueID;
+
+            if (forArg.type === `user`) {
+                let users = item.users || {};
+                item.users = users;
+                residingValue = item.users;
+                forValueID = forArg.value.id;
+            } else if (forArg.type === `role`) {
+                let roles = item.roles || {};
+                item.roles = roles;
+                residingValue = item.roles;
+                forValueID = forArg.value.id;
+            } else if (forArg.type === `permission`) {
+                let permissions = item.permissions || {};
+                item.permissions = permissions;
+                residingValue = item.permissions;
+                forValueID = forArg.value;
+            }
+
+            let location = residingValue[forValueID] || {};
+            residingValue[forValueID] = location;
+            return applyLocation(location, enable);
+        }
+
+        async function applyItem(action, value, enable) {
+            // action = everything, module, command
+            if (action === `module`) {
+                action = `modules`;
+            } else if (action === `command`) {
+                action = `commands`;
+            }
+
+            let item = dbGuild.permissions[action];
+            if (action !== `everything`) {
+                let subItem = item[value] || {};
+                item[value] = subItem;
+                item = subItem;
+            }
+
+            if (forArg.type) {
+                await applyUser(item, enable);
+            } else {
+                await applyLocation(item, enable);
+            }
+
+            dbGuild.markModified(`permissions`);
         }
 
         var args = arg.trim().split(/[\s]+/gi);
@@ -114,8 +193,8 @@ module.exports = (async function(client, helpers) {
         }
 
         let action = args.shift();
-        if (![`everything`, `module`, `command`].includes(action)) {
-            throw new Error(`No valid \`action\` type (\`everything\` | \`module\` | \`command\`) was provided.`);
+        if (!enableItems.includes(action)) {
+            throw new Error(`No valid \`action\` type: [${helpers.joinCode(enableItems, ` | `)}] was provided.`);
         }
 
         let value = args.shift();
@@ -137,7 +216,23 @@ module.exports = (async function(client, helpers) {
         await parseArgs(args);
 
         client.helpers.log(`command`, `enable`, `${value} (${action})`, `for: ${forArg.value ? (forArg.value.id ? forArg.value.id : forArg.value) : forArg.value} (${forArg.type})`, `in: ${inArg.value ? inArg.value.id : inArg.value} (${inArg.type})`);
-        // await client.addDeleteWatchForMessage(exports.meta.name, message, sentMessage);
+
+        console.log('before: ', JSON.stringify(dbGuild.permissions, null, 4));
+        await applyItem(action, value, true);
+        console.log('after: ', JSON.stringify(dbGuild.permissions, null, 4));
+        console.log(JSON.stringify(await dbGuild.save()));
+
+        var embed = client.helpers.generateSuccessEmbed(client, member.user, `**Enabled**: `);
+        var description = embed.description;
+        description += `\`${action}\` → \`${value || `n/a`}\``;
+        if (forArg.type) {
+            description += `\n**For**: \`${forArg.type}\` → ${forArg.value || `\`n/a\``}`;
+        }
+        if (inArg.type) {
+            description += `\n**In**: \`${inArg.type}\` → ${inArg.value || `\`n/a\``}`;
+        }
+        embed = embed.setDescription(description);
+        return message.channel.send({ embed });
     };
 
     return exports;
