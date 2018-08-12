@@ -11,7 +11,14 @@ module.exports = (async function(client, helpers) {
     let guildSchema = new Schema({
         _id: String,
         permissions: Schema.Types.Mixed,
+        settings: {
+            type: Schema.Types.Mixed,
+        },
     }, { _id: false });
+
+    const enableItems = [`everything`, `module`, `command`];
+    const enableParameterItems = [`module`, `command`];
+    const forArgTypes = [`user`, `role`, `permission`];
 
     guildSchema.statics.get = async function (id) {
         client.helpers.log(`db`, `getting guild`, id);
@@ -57,6 +64,12 @@ module.exports = (async function(client, helpers) {
             };
 
             return await guild.save();
+        }
+
+        if (!guild.settings) {
+            guild.settings = {
+                aliases: []
+            };
         }
 
         return guild;
@@ -199,6 +212,129 @@ module.exports = (async function(client, helpers) {
          });
 
          return proxy;
+    };
+
+    guildSchema.methods.updateSetting = async function (settingName, settingValue) {
+        let settings = this.settings || {};
+        settings[settingName] = settingValue;
+        this.settings = settings;
+        return this.markModified(`settings`);
+    };
+
+    guildSchema.methods.updatePermissions = async function (member, arg, enable, actionWord) {
+        let guild = member.guild;
+        let dbGuild = this;
+
+        let { action, value, forArg, inArg } = helpers.parseActionForIn(client, guild, arg);
+
+        async function applyLocation(item, enable) {
+            var residingValue;
+            var actualType = inArg.type;
+
+            if (inArg.type === `category`) {
+                residingValue = item.categories || {};
+                item.categories = residingValue;
+                actualType = `categories`;
+            } else if (inArg.type === `channel`) {
+                residingValue = item.channels || {};
+                item.channels = residingValue;
+                actualType = `channels`;
+            } else if (_.isBoolean(enable)) {
+                item.everywhere = enable;
+                return;
+            } else {
+                delete item.everywhere;
+                return;
+            }
+
+            if (_.isBoolean(enable)) {
+                residingValue[inArg.value.id] = enable;
+            } else {
+                delete residingValue[inArg.value.id];
+                if (Object.keys(item[actualType]).length === 0) {
+                    delete item[actualType];
+                }
+            }
+        }
+
+        async function applyUser(item, enable) {
+            var residingValue;
+            var forValueID;
+            var actualType = forArg.type;
+
+            if (forArg.type === `user`) {
+                let users = item.users || {};
+                item.users = users;
+                residingValue = item.users;
+                forValueID = forArg.value.id;
+                actualType = `users`;
+            } else if (forArg.type === `role`) {
+                let roles = item.roles || {};
+                item.roles = roles;
+                residingValue = item.roles;
+                forValueID = forArg.value.id;
+                actualType = `roles`;
+            } else if (forArg.type === `permission`) {
+                let permissions = item.permissions || {};
+                item.permissions = permissions;
+                residingValue = item.permissions;
+                forValueID = forArg.value;
+                actualType = `permissions`;
+            }
+
+            let location = residingValue[forValueID] || {};
+            residingValue[forValueID] = location;
+            await applyLocation(location, enable);
+
+            if (Object.keys(residingValue[forValueID]).length === 0) {
+                delete residingValue[forValueID];
+            }
+
+            if (Object.keys(item[actualType]).length === 0) {
+                delete item[actualType];
+            }
+        }
+
+        async function applyItem(action, value, enable) {
+            // action = everything, module, command
+            if (action === `module`) {
+                action = `modules`;
+            } else if (action === `command`) {
+                action = `commands`;
+            }
+
+            let item = dbGuild.permissions[action];
+            if (action !== `everything`) {
+                let subItem = item[value] || {};
+                item[value] = subItem;
+                item = subItem;
+            }
+
+            if (forArg.type) {
+                await applyUser(item, enable);
+            } else {
+                await applyLocation(item, enable);
+            }
+
+            return dbGuild.markModified(`permissions`);
+        }
+
+        console.log('before: ', JSON.stringify(dbGuild.permissions, null, 4));
+        await applyItem(action, value, enable);
+        console.log('after: ', JSON.stringify(dbGuild.permissions, null, 4));
+        await dbGuild.save();
+
+        var embed = client.helpers.generateSuccessEmbed(client, member.user, `**${actionWord}**: `);
+        var description = embed.description;
+        description += `\`${action}\` → \`${value || `n/a`}\``;
+        if (forArg.type) {
+            description += `\n**For**: \`${forArg.type}\` → ${forArg.value || `\`n/a\``}`;
+        }
+        if (inArg.type) {
+            description += `\n**In**: \`${inArg.type}\` → ${inArg.value || `\`n/a\``}`;
+        }
+        embed = embed.setDescription(description);
+        return embed;
     };
 
     db.model(`Guild`, guildSchema);

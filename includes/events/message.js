@@ -22,26 +22,25 @@ module.exports = (async function(client, helpers) {
 
         let content = message.content.split(` `);
         let command = content.shift();
-        let prefix = client.config.defaultPrefix;
-
+        let dbGuild = await Guild.get(message.guild.id);
+        let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
+        console.log(prefix);
+        
         if (command.startsWith(prefix)) {
             let arg = content.join(` `);
             command = command.slice(prefix.length);
 
             // checks if message contains a command and runs it
             let commandfile = client.commands.get(command);
-            if (commandfile) {
-                let guild = await Guild.get(message.guild.id);
-                if (guild.can(message.member).run(commandfile).in(message.channel)) {
-                    message.dbGuild = guild;
-                    let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
-                        let embed = client.helpers.generateErrorEmbed(client, message.member.user, error);
-                        return await message.channel.send({ embed });
-                    });
+            if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
+                message.dbGuild = dbGuild;
+                let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
+                    let embed = client.helpers.generateErrorEmbed(client, message.member.user, error);
+                    return await message.channel.send({ embed });
+                });
 
-                    if (sentMessage) {
-                        await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
-                    }
+                if (sentMessage) {
+                    await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
                 }
             }
         }

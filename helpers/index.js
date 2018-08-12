@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
+const _ = require('lodash');
 
 const helpers = {};
 
@@ -7,11 +8,17 @@ helpers.log = function (...args) {
     return console.log(args.join(` → `));
 };
 
+helpers.colors = {
+    success: [67, 181, 129],
+    error: [240, 71, 71],
+    info: [114, 137, 218],
+};
+
 helpers.generateErrorEmbed = function (client, user, error) {
     var embed = new Discord.RichEmbed();
     embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
     embed = embed.setDescription(`${client.customEmojis.xmark} ${error}`);
-    embed = embed.setColor([240, 71, 71]);
+    embed = embed.setColor(helpers.colors.error);
     return embed;
 };
 
@@ -19,8 +26,24 @@ helpers.generateSuccessEmbed = function (client, user, message) {
     var embed = new Discord.RichEmbed();
     embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
     embed = embed.setDescription(`${client.customEmojis.check} ${message}`);
-    embed = embed.setColor([67, 181, 129]);
+    embed = embed.setColor(helpers.colors.success);
     return embed;
+};
+
+helpers.generatePlainEmbed = function (client, user, message) {
+    var embed = new Discord.RichEmbed();
+    embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    embed = embed.setDescription(message);
+    embed = embed.setColor(helpers.colors.info);
+    return embed;
+};
+
+helpers.generateEmbed = function (client, user, message, success) {
+    if (success) {
+        return helpers.generateSuccessEmbed(client, user, message);
+    } else {
+        return helpers.generateErrorEmbed(client, user, message);
+    }
 };
 
 helpers.startsWith = function (str1, str2) {
@@ -154,5 +177,129 @@ helpers.findPermission = async function (value) {
 
     return undefined;
 };
+
+var modules;
+helpers.findAction = function (client, action) {
+    if (!modules) {
+        modules = _.uniq(client.commands.array().map(c => c.meta.module));
+    }
+
+    var value;
+    if (modules.includes(action)) {
+        value = action;
+        action = `module`;
+    } else if (value = client.commands.find(c => c.meta.name === action || c.meta.aliases.includes(action))) {
+        value = value.meta.name;
+        action = `command`;
+    } else if (action !== `everything`) {
+        throw new Error(`No valid module/command was provided. Please use one of the following:
+            Modules → ${modules.map(c => `\`${c}\``).join(`, `)}
+            Commands → ${client.commands.map(c => `\`${c.meta.name}\``).join(`, `)}
+        `);
+    }
+
+    return { action, value };
+}
+
+helpers.parseActionForIn = async function (client, guild, arg) {
+    let forArg = {
+
+    };
+
+    let inArg = {
+
+    };
+
+    async function parseArgs(args) {
+        var forIndex;
+        if (!forArg.type && (forIndex = args.indexOf(`for`)) >= 0) {
+            if (args.length <= (forIndex + 2)) {
+                throw new Error(`Arguments are missing for the  \`for\` input.`);
+            }
+
+            forArg.type = args[forIndex + 1];
+            forArg.value = args[forIndex + 2];
+
+            if (!forArgTypes.includes(forArg.type)) {
+                throw new Error(`No valid \`for\` type: [${helpers.joinCode(forArgTypes, ` | `)}] was provided.`);
+            }
+
+            if (forArg.type === `user`) {
+                let user = await client.helpers.findUser(guild, forArg.value);
+                if (!user) {
+                    throw new Error(`Unable to locate the specified \`user\`. Please use a more exact value such as the user's ID.`);
+                }
+
+                forArg.value = user;
+            }
+
+            if (forArg.type === `role`) {
+                let role = await client.helpers.findRole(guild, forArg.value);
+                if (!role) {
+                    throw new Error(`Unable to locate the specified \`role\`. Please use a more exact value such as the role's ID.`);
+                }
+
+                forArg.value = role;
+            }
+
+            if (forArg.type === `permission`) {
+                let permission = await client.helpers.findPermission(forArg.value);
+                if (!permission) {
+                    throw new Error(`Unable to locate the specified \`permission\`. Please use one of the following: ${Object.keys(Discord.Permissions.FLAGS).map(x => `\`${x}\``).join(`, `)}`);
+                }
+
+                forArg.value = permission;
+            }
+        }
+
+        var inIndex;
+        if (!inArg.type && (inIndex = args.indexOf(`in`)) >= 0) {
+            if (args.length <= (inIndex + 2)) {
+                throw new Error(`Arguments are missing for the  \`in\` input.`);
+            }
+
+            inArg.type = args[inIndex + 1];
+            inArg.value = args[inIndex + 2];
+
+            if (![`category`, `channel`].includes(inArg.type)) {
+                throw new Error(`No valid \`in\` type (\`category\` | \`channel\`) was provided.`);
+            }
+
+            if (inArg.type === `category`) {
+                let category = await client.helpers.findChannelCategory(guild, inArg.value);
+                if (!category) {
+                    throw new Error(`Unable to locate the specified \`category\`. Please use a more exact value such as the user's ID.`);
+                }
+
+                inArg.value = category;
+            }
+
+            if (inArg.type === `channel`) {
+                let channel = await client.helpers.findChannel(guild, inArg.value);
+                if (!channel) {
+                    throw new Error(`Unable to locate the specified \`channel\`. Please use a more exact value such as the role's ID.`);
+                }
+
+                inArg.value = channel;
+            }
+        }
+    }
+
+    var args = arg.trim().split(/[\s]+/gi);
+    if (arg.length == 0 || args.length == 0) {
+        throw new Error(`No arguments were provided.`);
+    }
+
+    let { action, value } = helpers.findAction(client, args.shift());
+
+    args = args.join(` `).split(`\n`);
+    await parseArgs(args);
+    args = args.join(`\n`).split(`,`);
+    await parseArgs(args);
+    args = args.join(`,`).split(` `);
+    await parseArgs(args);
+
+    return { action, value, forArg, inArg };
+}
 
 module.exports = helpers;
