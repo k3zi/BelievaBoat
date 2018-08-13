@@ -4,7 +4,6 @@ const moment = require('moment');
 const _ = require('lodash');
 const fs = Promise.promisifyAll(require('fs'));
 const numeral = require('numeral');
-const omitDeep = require("omit-deep-lodash");
 
 module.exports = (async function(client, helpers) {
     const exports = {};
