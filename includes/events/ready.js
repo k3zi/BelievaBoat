@@ -7,7 +7,7 @@ module.exports = (async function(client, helpers) {
     const db = client.db;
     const emojis = {
         online: `476143357853302796`,
-        offline: `476143358134190081`,
+        offline: `478260206602813444`,
         idle: `476143357715021855`,
         dnd: `476143357895245846`,
         check: `478239987670843422`,

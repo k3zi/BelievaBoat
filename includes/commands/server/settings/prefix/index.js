@@ -7,11 +7,6 @@ const fs = Promise.promisifyAll(require('fs'));
 module.exports = (async function(client, helpers) {
     const exports = {};
 
-    const db = client.db;
-    const emojis = client.customEmojis;
-    const VoiceChannelJoinActivity = db.model('VoiceChannelJoinActivity');
-    // const logTypes = [`delete`, `edit`, `reaction`, `media`, `link`];
-
     exports.meta = {};
     exports.meta.name = `prefix`;
     exports.meta.aliases = [`set-prefix`, `set-unbpro-prefix`];
@@ -21,7 +16,7 @@ module.exports = (async function(client, helpers) {
     exports.meta.examples = ['prefix !', 'prefix -'];
 
     exports.run = async (client, message, arg) => {
-        let dbGuild = message.dbGuild;
+        let { dbGuild, guild } = message;
         let args = arg.trim().split(/[\s\n]+/gi);
         if (arg.length == 0 || args.length == 0) {
             throw new Error(`No arguments were provided.`);
