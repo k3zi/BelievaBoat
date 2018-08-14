@@ -38,11 +38,11 @@ exports.answer = async function (region, session, signature, answerid, step) {
     return require('./answer')(url, session, signature, answerid, step);
 };
 
-exports.list = async function (region, session, signature, answerid, step) {
+exports.list = async function (region, session, signature, step) {
     region = region.toLowerCase();
     if (!regions.includes(region)) {
         throw new Error("Invalid language provided.");
     }
     let url = regionToURLMapping[region];
-    return require('./list')(url, session, signature, answerid, step);
+    return require('./list')(url, session, signature, step);
 };
