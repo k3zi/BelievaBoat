@@ -35,17 +35,13 @@ module.exports = (async function(client, helpers) {
         embed = embed.setColor(client.helpers.colors.warning);
 
         var description = ``;
-        description += `${client.customEmojis.neutral} Message Round Trip: \`-- ms\``;
-        description += `\n${client.customEmojis.check} Discord Websocket Heartbeat: \`${util.format('%i', client.ping)} ms\``;
+        description += `${client.customEmojis.loading} Message Round Trip: \`-- ms\``;
+        description += `\n${client.customEmojis.check} Discord Heartbeat: \`${util.format('%i', client.ping)} ms\``;
         description += `\n${client.customEmojis.check} Database: \`${heartTimeToMs(databasePing)} ms\``;
         embed = embed.setDescription(description);
 
         const filter = m => true;
         const collector = message.channel.createMessageCollector(filter, { time: 15000 });
-        var sentMessage;
-        var alreadySent = false;
-        var hasBeenEdited = false;
-        var mewEmbed;
         collector.on('collect', async m => {
             let potentialT = process.hrtime(t);
 
@@ -53,32 +49,19 @@ module.exports = (async function(client, helpers) {
                 return;
             }
 
-            if (!hasBeenEdited) {
-                t = potentialT;
-                collector.stop();
-                description = description.replace('--', heartTimeToMs(t));
-                description = description.replace(client.customEmojis.neutral, client.customEmojis.check);
-                mewEmbed = embed.setDescription(description);
-                embed = embed.setColor(client.helpers.colors.success);
-                hasBeenEdited = true;
-
-                if (sentMessage) {
-                    alreadySent = true;
-                    await sentMessage.edit({ embed });
-                }
-
-                return hasBeenEdited;
-            }
+            t = potentialT;
+            console.log('collector received message');
+            description = description.replace('--', heartTimeToMs(t));
+            description = description.replace(client.customEmojis.loading, client.customEmojis.check);
+            embed = embed.setDescription(description);
+            embed = embed.setColor(client.helpers.colors.success);
+            console.log(await m.edit({ embed }));
+            console.log('messaged has been edited');
+            collector.stop();
         });
 
         t = process.hrtime();
-        sentMessage = await message.channel.send({ embed });
-
-        if (!alreadySent && hasBeenEdited) {
-            alreadySent = true;
-            await sentMessage.edit({ embed });
-        }
-        return sentMessage;
+        return message.channel.send({ embed });
     };
 
     return exports;
