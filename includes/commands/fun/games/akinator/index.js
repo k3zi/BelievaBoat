@@ -27,10 +27,10 @@ module.exports = (async function(client, helpers) {
         let singlePlayStyle = guild.me.hasPermission('MANAGE_MESSAGES') ? true : false;
         if (arg.length > 0) {
             arg = arg.toLowerCase();
-            if (api.includes(arg)) {
+            if (api.regions.includes(arg)) {
                 language = arg;
             } else {
-                throw new Error("Invalid language provided. Possible languages include: ")
+                throw new Error(`Invalid language provided. Possible languages include: ${client.helpers.joinCode(api.regions, `・`)}`);
             }
         }
 
@@ -65,7 +65,6 @@ module.exports = (async function(client, helpers) {
                     return;
                 }
 
-                console.log('Stopping collector...');
                 collector.stop();
                 if (sentMessage.channel.fetchMessage(sentMessage.id)) {
                     embed = embed.setColor(client.helpers.colors.error);
@@ -78,20 +77,24 @@ module.exports = (async function(client, helpers) {
             var collectorEnded = false;
             var allocatedDispatcher;
             var currentStep = step;
+            var checkData = false;
             collector.on('collect', async r => {
-                if (currentStep != step) {
-                    return;
+                if (!checkData) {
+                    if (currentStep != step) {
+                        return;
+                    }
+                    step += 1;
                 }
-                step += 1;
 
                 if (r.emoji.id === client.customEmojis.xmark.id) {
-                    console.log('Ending the game.');
                     isPlaying = false;
                     collector.stop();
                     if (sentMessage.channel.fetchMessage(sentMessage.id)) {
                         embed = embed.setColor(client.helpers.colors.error);
                         embed = embed.addField('Game Over.', 'The game has been ended.');
+                        embed.fields.splice(embed.fields.length - 1, 1);
                         sentMessage = await sentMessage.edit({ embed });
+                        await sentMessage.clearReactions();
                     }
 
                     return;
@@ -102,9 +105,6 @@ module.exports = (async function(client, helpers) {
                     return;
                 }
 
-                console.log('answer: ', reactionNumber);
-
-                console.log('Refreshing Timer On Click...');
                 clearTimeout(timer);
                 timer = setTimeout(determineCont, secondsForResponse * 1000);
                 embed.fields.splice(embed.fields.length - 1, 1);
@@ -114,33 +114,62 @@ module.exports = (async function(client, helpers) {
                     })
                 });
 
-                gameData = await api.answer(language, initialGameData.session, initialGameData.signature, reactionNumber, currentStep).catch(async (error) => {
-                    if (sentMessage.channel.fetchMessage(sentMessage.id)) {
-                        embed = embed.setColor(client.helpers.colors.error);
-                        embed = embed.addField('Game Over.', error);
-                        sentMessage = await sentMessage.edit({ embed });
-                    }
+                if (!checkData) {
+                    gameData = await api.answer(language, initialGameData.session, initialGameData.signature, reactionNumber, currentStep).catch(async (error) => {
+                        if (sentMessage.channel.fetchMessage(sentMessage.id)) {
+                            embed = embed.setColor(client.helpers.colors.error);
+                            embed = embed.addField('Game Over.', error);
+                            sentMessage = await sentMessage.edit({ embed });
+                            await sentMessage.clearReactions();
+                        }
 
-                    return false;
-                });
-
-                let checkData = await api.list(language, initialGameData.session, initialGameData.signature).catch(async (error) => {
-                });
+                        return false;
+                    });
+                }
 
                 if (gameData && sentMessage.channel.fetchMessage(sentMessage.id)) {
-                    if (gameData.progression > 85) {
-                        let checkData = await api.list(language, initialGameData.session, initialGameData.signature, reactionNumber, currentStep).catch(async (error) => {
+                    if (checkData) {
+                        if (reactionNumber === 0) {
+                            embed = embed.setColor(client.helpers.colors.success);
+                            embed = embed.setDescription(`Answer: **${checkData.name}** (${checkData.description})`);
+                            embed = embed.addField('Game Over!', 'I enjoyed playing with you :)');
+                            sentMessage = await sentMessage.edit({ embed });
+                            await sentMessage.clearReactions();
+                            isPlaying = false;
+                            collector.stop();
+                            return;
+                        } else if (reactionNumber === 1) {
+                            embed.fields.splice(embed.fields.length - 1, 1);
+                            delete embed.thumbnail;
+                            checkData = false;
+                        } else {
+                            return;
+                        }
+                    } else if (gameData.progress > 85) {
+                        let tempCheckData = await api.list(language, initialGameData.session, initialGameData.signature, step).catch(async (error) => {
                             if (sentMessage.channel.fetchMessage(sentMessage.id)) {
                                 embed = embed.setColor(client.helpers.colors.error);
                                 embed = embed.addField('Game Over.', error);
                                 sentMessage = await sentMessage.edit({ embed });
+                                await sentMessage.clearReactions();
                             }
                         });
+
+                        if (tempCheckData.length) {
+                            checkData = tempCheckData[0].element;
+                            let parsedAnswers = [`1 - Yes`, `2 - No`];
+                            embed = embed.addField(`Is your character **${checkData.name}** (${checkData.description})?`, parsedAnswers.join("\n"));
+                            embed = embed.setThumbnail(checkData.absolute_picture_path);
+                            sentMessage = await sentMessage.edit({ embed });
+                            return;
+                        }
                     }
+
                     let parsedAnswers = gameData.answers.map((a, i) => {
                         return a.replace(i, i + 1);
                     });
                     embed = embed.addField(`${step}. ${gameData.question}`, parsedAnswers.join("\n"));
+                    embed = embed.setTitle(`Game of Akinator (Progress: ${util.format('%i', gameData.progress)}%):`);
                     sentMessage = await sentMessage.edit({ embed });
                 } else {
                     collector.stop();
@@ -153,6 +182,7 @@ module.exports = (async function(client, helpers) {
                 let parsedAnswers = gameData.answers.map((a, i) => {
                     return a.replace(i, i + 1);
                 });
+                delete embed.description;
                 embed = embed.addField(`${step}. ${gameData.question}`, parsedAnswers.join("\n"));
                 sentMessage = await sentMessage.edit({ embed });
             }
