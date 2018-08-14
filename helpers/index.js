@@ -59,9 +59,15 @@ helpers.mumberToOrdinal = function (n) {
     return ["st","nd","rd"][(((n < 0 ? -n : n) + 90 ) % 100 - 10) % 10 - 1] || "th";
 }
 
+helpers.addSenderToFooter = function (embed, message, filler) {
+    return embed.setFooter(`${message.author.username}#${message.author.discriminator} ${filler} in #${message.channel.name}`, message.author.displayAvatarURL);
+}
+
 helpers.generateErrorEmbed = function (client, user, error) {
     var embed = new Discord.RichEmbed();
-    embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    if (user) {
+        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    }
     embed = embed.setDescription(`${client.customEmojis.xmark} ${error}`);
     embed = embed.setColor(helpers.colors.error);
     return embed;
@@ -69,7 +75,9 @@ helpers.generateErrorEmbed = function (client, user, error) {
 
 helpers.generateSuccessEmbed = function (client, user, message) {
     var embed = new Discord.RichEmbed();
-    embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    if (user) {
+        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    }
     embed = embed.setDescription(`${client.customEmojis.check} ${message}`);
     embed = embed.setColor(helpers.colors.success);
     return embed;
@@ -77,7 +85,9 @@ helpers.generateSuccessEmbed = function (client, user, message) {
 
 helpers.generatePlainEmbed = function (client, user, message) {
     var embed = new Discord.RichEmbed();
-    embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    if (user) {
+        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+    }
     embed = embed.setDescription(message);
     embed = embed.setColor(helpers.colors.info);
     return embed;

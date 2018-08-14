@@ -16,24 +16,28 @@ module.exports = (async function(client, helpers) {
     exports.meta.module = 'info';
     exports.meta.examples = ['ping'];
 
+    function heartTimeToMs (t) {
+        return util.format('%i', t[0] * 1000 +  t[1] / 1000000);
+    }
+
     exports.run = async (client, message, arg) => {
         let { dbGuild, guild } = message;
 
         var t = process.hrtime();
         let result = await client.db.connection.db.admin().ping();
-        t = process.hrtime(t);
+        let databasePing = process.hrtime(t);
         console.log('benchmark took %d seconds and %d nanoseconds', t[0], t[1]);
         console.log(result);
 
         var embed = client.helpers.generatePlainEmbed(client, client.user, '');
         embed = embed.setTitle(`Ping Results:`);
-        embed = embed.setFooter(`Replying to: \`${message.id}\``);
+        embed = embed.setFooter(`Replying to: ${message.id}`);
         embed = embed.setColor(client.helpers.colors.warning);
 
         var description = ``;
-        description += `${client.customEmojis.neutral} Message Round Trip: \`--ms\``;
-        description += `\n${client.customEmojis.check} Discord Websocket Heartbeat: \`${client.ping}ms\``;
-        description += `\n${client.customEmojis.check} Database: \`2ms\``;
+        description += `${client.customEmojis.neutral} Message Round Trip: \`-- ms\``;
+        description += `\n${client.customEmojis.check} Discord Websocket Heartbeat: \`${util.format('%i', client.ping)} ms\``;
+        description += `\n${client.customEmojis.check} Database: \`${heartTimeToMs(databasePing)} ms\``;
         embed = embed.setDescription(description);
 
         const filter = m => true;
@@ -52,7 +56,7 @@ module.exports = (async function(client, helpers) {
             if (!hasBeenEdited) {
                 t = potentialT;
                 collector.stop();
-                description = description.replace('--', util.format('%d', t[0] * 1000 +  t[1] / 1000000));
+                description = description.replace('--', heartTimeToMs(t));
                 description = description.replace(client.customEmojis.neutral, client.customEmojis.check);
                 mewEmbed = embed.setDescription(description);
                 embed = embed.setColor(client.helpers.colors.success);

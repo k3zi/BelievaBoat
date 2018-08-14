@@ -12,11 +12,11 @@ module.exports = (async function(client, helpers) {
     const VoiceChannelJoinActivity = db.model('VoiceChannelJoinActivity');
 
     exports.meta = {};
-    exports.meta.name = 'profile';
-    exports.meta.aliases = [];
+    exports.meta.name = 'user-info';
+    exports.meta.aliases = ['profile', 'user'];
     exports.meta.description = 'Shows info related to the provided user or message author.';
     exports.meta.module = 'server';
-    exports.meta.examples = ['profile', 'profile @27'];
+    exports.meta.examples = ['profile', 'user-info @27'];
 
     exports.run = async (client, message, arg) => {
         var member = message.member;

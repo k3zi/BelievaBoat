@@ -56,7 +56,7 @@ module.exports = (async function(client, helpers) {
 
         let permissions = client.helpers.joinCode(Object.entries(client.helpers.permissionsToHumanReadable).filter(e => role.hasPermission(e[0])).map(e => e[1]), ` ・ `) || `None`;
         embed = embed.addField('Permissions:', permissions, false);
-        embed = embed.setFooter(`${sender.username}#${sender.discriminator} requested this information in #${message.channel.name}`, sender.displayAvatarURL);
+        embed = client.helpers.addSenderToFooter(embed, message, 'requested this information');
         embed = embed.setTimestamp(message.createdAt);
 
         return message.channel.send({ embed });

@@ -38,7 +38,7 @@ module.exports = (async function(client, helpers) {
                     return await message.channel.send({ embed });
                 });
 
-                if (sentMessage) {
+                if (sentMessage && message.guild.me.hasPermission('MANAGE_MESSAGES')) {
                     await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
                 }
             }
