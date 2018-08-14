@@ -1,9 +1,9 @@
 const request = require('request-promise');
-module.exports = async function (url, session, signature, answerid, step) {
+module.exports = async function (url, session, signature, step) {
     const opts = {
         method: 'GET',
         json: true,
-        uri: `https://${url}/ws/list?callback=&session=${session}&signature=${signature}&constraint=ETAT<>'AV'`,
+        uri: `https://${url}/ws/list?callback=&session=${session}&signature=${signature}&step=${step}&mode_question=0&constraint=ETAT<>'AV'`,
         headers: {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate',
@@ -16,16 +16,7 @@ module.exports = async function (url, session, signature, answerid, step) {
     return request(opts).then(function(json) {
         console.log(json);
         if (json.completion === 'OK') {
-            let ans = []
-            for (var i = 0; i < json.parameters.answers.length; i++) {
-                ans.push(`${i} - ${json.parameters.answers[i].answer}`)
-            }
-            game = {
-                question: json.parameters.question,
-                progress: json.parameters.progression,
-                answers: ans
-            }
-            return game;
+            return json.parameters.elements;
         } else if (json.completion === `KO - ELEM LIST IS EMPTY`) {
             return [];
         } else if (json.completion === 'KO - SERVER DOWN') {
