@@ -4,6 +4,8 @@ const _ = require('lodash');
 
 const helpers = {};
 
+helpers.forArgTypes = [`user`, `role`, `permission`];
+
 helpers.colors = {
     success: [67, 181, 129],
     error: [240, 71, 71],
@@ -63,12 +65,22 @@ helpers.addSenderToFooter = function (embed, message, filler) {
     return embed.setFooter(`${message.author.username}#${message.author.discriminator} ${filler} in #${message.channel.name}`, message.author.displayAvatarURL);
 }
 
+helpers.formatPlainUserString = function (user) {
+    return `${user.username}#${user.discriminator}`;
+}
+
+helpers.formatUserMentionExtraString = function (user) {
+    return `${user} \`[${helpers.formatPlainUserString(user)} | ${user.id}]\``;
+}
+
 helpers.generateErrorEmbed = function (client, user, error) {
     var embed = new Discord.RichEmbed();
     if (user) {
         embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
     }
-    embed = embed.setDescription(`${client.customEmojis.xmark} ${error}`);
+    if (error) {
+        embed = embed.setDescription(`${client.customEmojis.xmark} ${error}`);
+    }
     embed = embed.setColor(helpers.colors.error);
     return embed;
 };
@@ -239,14 +251,136 @@ helpers.findAction = function (client, action) {
         value = value.meta.name;
         action = `command`;
     } else if (action !== `everything`) {
-        throw new Error(`No valid module/command was provided. Please use one of the following:
-            Modules → ${modules.map(c => `\`${c}\``).join(`, `)}
-            Commands → ${client.commands.map(c => `\`${c.meta.name}\``).join(`, `)}
-        `);
+        throw new Error(`No valid module/command was provided. Please use one of the following:`
+            + `\nModules → ${modules.map(c => `\`${c}\``).join(`, `)}`
+            + `\nCommands → ${client.commands.map(c => `\`${c.meta.name}\``).join(`, `)}`);
     }
 
     return { action, value };
+};
+
+function innerSearchCommands (client, dbGuild, action) {
+    action = action.toLowerCase();
+    return client.commands.find(c =>
+        c.meta.name === action
+        || dbGuild.settings.aliases.some(a => a.from === action && a.to === c.meta.name)
+        || (!dbGuild.settings.removedAliases.some(a => a.from === action) && c.meta.aliases.includes(action))
+    );
 }
+
+helpers.innerSearchCommands = innerSearchCommands;
+
+helpers.findCommand = function (client, dbGuild, action) {
+    if (!modules) {
+        modules = _.uniq(client.commands.array().map(c => c.meta.module));
+    }
+
+    var value;
+    if (modules.includes(action)) {
+        throw new Error(`A module name can no be used here. Please use one of the following commands:`
+            + `\n${client.commands.map(c => `\`${c.meta.name}\``).join(`, `)}`);
+    } else if (value = innerSearchCommands(client, dbGuild, action)) {
+        return value;
+    } else {
+        throw new Error(`No valid command was provided. Please use one of the following:`
+            + `\n${client.commands.map(c => `\`${c.meta.name}\``).join(`, `)}`);
+    }
+};
+
+helpers.aliasWorks = function (client, dbGuild, action) {
+    action = action.toLowerCase();
+    if (!modules) {
+        modules = _.uniq(client.commands.array().map(c => c.meta.module));
+    }
+
+    var value;
+    if (modules.includes(action)) {
+        return false;
+    } else if (value = innerSearchCommands(client, dbGuild, action)) {
+        return false;
+    } else if (value === `everything`) {
+        return false;
+    } else if (Object.keys(dbGuild.settings.aliases).includes(action)) {
+        return false;
+    }
+
+    return true;
+};
+
+helpers.parseArgs = async function (client, guild, args, forArg, inArg) {
+    var forIndex;
+    if (!forArg.type && (forIndex = args.indexOf(`for`)) >= 0) {
+        if (args.length <= (forIndex + 2)) {
+            throw new Error(`Arguments are missing for the  \`for\` input.`);
+        }
+
+        forArg.type = args[forIndex + 1];
+        forArg.value = args[forIndex + 2];
+
+        if (!helpers.forArgTypes.includes(forArg.type)) {
+            throw new Error(`No valid \`for\` type: [${client.helpers.joinCode(helpers.forArgTypes, ` | `)}] was provided.`);
+        }
+
+        if (forArg.type === `user`) {
+            let user = await client.helpers.findUser(guild, forArg.value);
+            if (!user) {
+                throw new Error(`Unable to locate the specified \`user\`. Please use a more exact value such as the user's ID.`);
+            }
+
+            forArg.value = user;
+        }
+
+        if (forArg.type === `role`) {
+            let role = await client.helpers.findRole(guild, forArg.value);
+            if (!role) {
+                throw new Error(`Unable to locate the specified \`role\`. Please use a more exact value such as the role's ID.`);
+            }
+
+            forArg.value = role;
+        }
+
+        if (forArg.type === `permission`) {
+            let permission = await client.helpers.findPermission(forArg.value);
+            if (!permission) {
+                throw new Error(`Unable to locate the specified \`permission\`. Please use one of the following: ${Object.keys(Discord.Permissions.FLAGS).map(x => `\`${x}\``).join(`, `)}`);
+            }
+
+            forArg.value = permission;
+        }
+    }
+
+    var inIndex;
+    if (inArg && !inArg.type && (inIndex = args.indexOf(`in`)) >= 0) {
+        if (args.length <= (inIndex + 2)) {
+            throw new Error(`Arguments are missing for the  \`in\` input.`);
+        }
+
+        inArg.type = args[inIndex + 1];
+        inArg.value = args[inIndex + 2];
+
+        if (![`category`, `channel`].includes(inArg.type)) {
+            throw new Error(`No valid \`in\` type (\`category\` | \`channel\`) was provided.`);
+        }
+
+        if (inArg.type === `category`) {
+            let category = await client.helpers.findChannelCategory(guild, inArg.value);
+            if (!category) {
+                throw new Error(`Unable to locate the specified \`category\`. Please use a more exact value such as the user's ID.`);
+            }
+
+            inArg.value = category;
+        }
+
+        if (inArg.type === `channel`) {
+            let channel = await client.helpers.findChannel(guild, inArg.value);
+            if (!channel) {
+                throw new Error(`Unable to locate the specified \`channel\`. Please use a more exact value such as the role's ID.`);
+            }
+
+            inArg.value = channel;
+        }
+    }
+};
 
 helpers.parseActionForIn = async function (client, guild, arg) {
     let forArg = {
@@ -257,81 +391,6 @@ helpers.parseActionForIn = async function (client, guild, arg) {
 
     };
 
-    async function parseArgs(args) {
-        var forIndex;
-        if (!forArg.type && (forIndex = args.indexOf(`for`)) >= 0) {
-            if (args.length <= (forIndex + 2)) {
-                throw new Error(`Arguments are missing for the  \`for\` input.`);
-            }
-
-            forArg.type = args[forIndex + 1];
-            forArg.value = args[forIndex + 2];
-
-            if (!forArgTypes.includes(forArg.type)) {
-                throw new Error(`No valid \`for\` type: [${helpers.joinCode(forArgTypes, ` | `)}] was provided.`);
-            }
-
-            if (forArg.type === `user`) {
-                let user = await client.helpers.findUser(guild, forArg.value);
-                if (!user) {
-                    throw new Error(`Unable to locate the specified \`user\`. Please use a more exact value such as the user's ID.`);
-                }
-
-                forArg.value = user;
-            }
-
-            if (forArg.type === `role`) {
-                let role = await client.helpers.findRole(guild, forArg.value);
-                if (!role) {
-                    throw new Error(`Unable to locate the specified \`role\`. Please use a more exact value such as the role's ID.`);
-                }
-
-                forArg.value = role;
-            }
-
-            if (forArg.type === `permission`) {
-                let permission = await client.helpers.findPermission(forArg.value);
-                if (!permission) {
-                    throw new Error(`Unable to locate the specified \`permission\`. Please use one of the following: ${Object.keys(Discord.Permissions.FLAGS).map(x => `\`${x}\``).join(`, `)}`);
-                }
-
-                forArg.value = permission;
-            }
-        }
-
-        var inIndex;
-        if (!inArg.type && (inIndex = args.indexOf(`in`)) >= 0) {
-            if (args.length <= (inIndex + 2)) {
-                throw new Error(`Arguments are missing for the  \`in\` input.`);
-            }
-
-            inArg.type = args[inIndex + 1];
-            inArg.value = args[inIndex + 2];
-
-            if (![`category`, `channel`].includes(inArg.type)) {
-                throw new Error(`No valid \`in\` type (\`category\` | \`channel\`) was provided.`);
-            }
-
-            if (inArg.type === `category`) {
-                let category = await client.helpers.findChannelCategory(guild, inArg.value);
-                if (!category) {
-                    throw new Error(`Unable to locate the specified \`category\`. Please use a more exact value such as the user's ID.`);
-                }
-
-                inArg.value = category;
-            }
-
-            if (inArg.type === `channel`) {
-                let channel = await client.helpers.findChannel(guild, inArg.value);
-                if (!channel) {
-                    throw new Error(`Unable to locate the specified \`channel\`. Please use a more exact value such as the role's ID.`);
-                }
-
-                inArg.value = channel;
-            }
-        }
-    }
-
     var args = arg.trim().split(/[\s]+/gi);
     if (arg.length == 0 || args.length == 0) {
         throw new Error(`No arguments were provided.`);
@@ -340,11 +399,11 @@ helpers.parseActionForIn = async function (client, guild, arg) {
     let { action, value } = helpers.findAction(client, args.shift());
 
     args = args.join(` `).split(`\n`);
-    await parseArgs(args);
+    await helpers.parseArgs(client, guild, args, forArg, inArg);
     args = args.join(`\n`).split(`,`);
-    await parseArgs(args);
+    await helpers.parseArgs(client, guild, args, forArg, inArg);
     args = args.join(`,`).split(` `);
-    await parseArgs(args);
+    await helpers.parseArgs(client, guild, args, forArg, inArg);
 
     return { action, value, forArg, inArg };
 }

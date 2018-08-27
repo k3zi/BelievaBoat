@@ -50,7 +50,7 @@ module.exports = (async function(client, helpers) {
         let initialGameData = await api.start(language);
         var gameData = initialGameData;
         await Promise.delay(3000);
-        console.log(gameData);
+
         if (singlePlayStyle) {
             let filter = (reaction, user) => {
                 return user.id === message.author.id;
@@ -66,7 +66,7 @@ module.exports = (async function(client, helpers) {
                 }
 
                 collector.stop();
-                if (sentMessage.channel.fetchMessage(sentMessage.id)) {
+                if (!sentMessage.deleted) {
                     embed = embed.setColor(client.helpers.colors.error);
                     embed = embed.addField('Game Over.', 'The game has ended due to the lack of response in the allotted time.');
                     sentMessage = await sentMessage.edit({ embed });
@@ -89,7 +89,7 @@ module.exports = (async function(client, helpers) {
                 if (r.emoji.id === client.customEmojis.xmark.id) {
                     isPlaying = false;
                     collector.stop();
-                    if (sentMessage.channel.fetchMessage(sentMessage.id)) {
+                    if (!sentMessage.deleted) {
                         embed = embed.setColor(client.helpers.colors.error);
                         embed = embed.addField('Game Over.', 'The game has been ended.');
                         embed.fields.splice(embed.fields.length - 1, 1);
@@ -116,7 +116,7 @@ module.exports = (async function(client, helpers) {
 
                 if (!checkData) {
                     gameData = await api.answer(language, initialGameData.session, initialGameData.signature, reactionNumber, currentStep).catch(async (error) => {
-                        if (sentMessage.channel.fetchMessage(sentMessage.id)) {
+                        if (!sentMessage.deleted) {
                             embed = embed.setColor(client.helpers.colors.error);
                             embed = embed.addField('Game Over.', error);
                             sentMessage = await sentMessage.edit({ embed });
@@ -127,7 +127,7 @@ module.exports = (async function(client, helpers) {
                     });
                 }
 
-                if (gameData && sentMessage.channel.fetchMessage(sentMessage.id)) {
+                if (gameData && !sentMessage.deleted) {
                     if (checkData) {
                         if (reactionNumber === 0) {
                             embed = embed.setColor(client.helpers.colors.success);
@@ -147,7 +147,7 @@ module.exports = (async function(client, helpers) {
                         }
                     } else if (gameData.progress > 85) {
                         let tempCheckData = await api.list(language, initialGameData.session, initialGameData.signature, step).catch(async (error) => {
-                            if (sentMessage.channel.fetchMessage(sentMessage.id)) {
+                            if (!sentMessage.deleted) {
                                 embed = embed.setColor(client.helpers.colors.error);
                                 embed = embed.addField('Game Over.', error);
                                 sentMessage = await sentMessage.edit({ embed });
@@ -158,6 +158,7 @@ module.exports = (async function(client, helpers) {
                         if (tempCheckData.length) {
                             checkData = tempCheckData[0].element;
                             let parsedAnswers = [`1 - Yes`, `2 - No`];
+                            embed = embed.setTitle(`Game of Akinator (Progress: ${util.format('%i', gameData.progress)}%):`);
                             embed = embed.addField(`Is your character **${checkData.name}** (${checkData.description})?`, parsedAnswers.join("\n"));
                             embed = embed.setThumbnail(checkData.absolute_picture_path);
                             sentMessage = await sentMessage.edit({ embed });
@@ -178,7 +179,7 @@ module.exports = (async function(client, helpers) {
                 currentStep += 1;
             });
 
-            if (sentMessage.channel.fetchMessage(sentMessage.id)) {
+            if (!sentMessage.deleted) {
                 let parsedAnswers = gameData.answers.map((a, i) => {
                     return a.replace(i, i + 1);
                 });

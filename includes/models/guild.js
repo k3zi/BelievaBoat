@@ -18,7 +18,6 @@ module.exports = (async function(client, helpers) {
 
     const enableItems = [`everything`, `module`, `command`];
     const enableParameterItems = [`module`, `command`];
-    const forArgTypes = [`user`, `role`, `permission`];
 
     guildSchema.statics.get = async function (id) {
         client.helpers.log(`db`, `getting guild`, id);
@@ -62,17 +61,29 @@ module.exports = (async function(client, helpers) {
 
                 }
             };
-
-            return await guild.save();
         }
 
         if (!guild.settings) {
             guild.settings = {
-                aliases: []
+                aliases: [],
+                removedAliases: [],
+                prefix: client.config.defaultPrefix,
             };
         }
 
-        return guild;
+        if (!guild.settings.aliases) {
+            guild.settings.aliases = [];
+        }
+
+        if (!guild.settings.removedAliases) {
+            guild.settings.removedAliases = [];
+        }
+
+        if (!guild.settings.logs) {
+            guild.settings.logs = [];
+        }
+
+         return guild.save();
     };
 
     let checkWhat = function (result, item, member, type, command, channel) {
@@ -221,11 +232,31 @@ module.exports = (async function(client, helpers) {
         return this.markModified(`settings`);
     };
 
+    guildSchema.methods.findWatches = function (member, type) {
+        return this.settings.logs.filter(l => {
+            if (l.type !== type) {
+                return false;
+            }
+
+            if (l.for.type === 'everyone') {
+                return true;
+            } else if (l.for.type === 'user') {
+                return l.for.value === member.user.id;
+            } else if (l.for.type === 'role') {
+                return member.hasRole(l.for.value);
+            } else if (l.for.type === 'permission') {
+                return member.hasPermission(l.for.value);
+            }
+
+            return false;
+        });
+    };
+
     guildSchema.methods.updatePermissions = async function (member, arg, enable, actionWord) {
         let guild = member.guild;
         let dbGuild = this;
 
-        let { action, value, forArg, inArg } = helpers.parseActionForIn(client, guild, arg);
+        let { action, value, forArg, inArg } = await helpers.parseActionForIn(client, guild, arg);
 
         async function applyLocation(item, enable) {
             var residingValue;
@@ -320,6 +351,7 @@ module.exports = (async function(client, helpers) {
         }
 
         console.log('before: ', JSON.stringify(dbGuild.permissions, null, 4));
+        console.log('action: ', action, 'value: ', value);
         await applyItem(action, value, enable);
         console.log('after: ', JSON.stringify(dbGuild.permissions, null, 4));
         await dbGuild.save();

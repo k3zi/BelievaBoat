@@ -30,11 +30,12 @@ module.exports = (async function(client, helpers) {
             command = command.slice(prefix.length);
 
             // checks if message contains a command and runs it
-            let commandfile = client.commands.find(c => c.meta.name === command || c.meta.aliases.includes(command));
+            let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
             if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
                 message.dbGuild = dbGuild;
                 let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
-                    let embed = client.helpers.generateErrorEmbed(client, message.member.user, error);
+                    var embed = client.helpers.generateErrorEmbed(client, undefined, error);
+                    embed = client.helpers.addSenderToFooter(embed, message, 'executed this request');
                     return await message.channel.send({ embed });
                 });
 
