@@ -90,7 +90,7 @@ module.exports = (async function(client, helpers) {
                 collector.stop();
                 await sentMessage.reactions.removeAll();
             };
-            let timer = setTimeout(stop, 15 * 1000);
+            let timer = setTimeout(stop, 120 * 1000);
             collector.on('collect', async r => {
                 if (r.emoji.name == '❌') {
                     return await stop();
@@ -105,7 +105,7 @@ module.exports = (async function(client, helpers) {
                 await addReactions(sentMessage, index, descriptions);
     
                 clearTimeout(timer);
-                timer = setTimeout(stop, 15 * 1000);
+                timer = setTimeout(stop, 120 * 1000);
             });
 
             await addReactions(sentMessage, index, descriptions);
