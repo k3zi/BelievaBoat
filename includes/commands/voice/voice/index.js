@@ -139,7 +139,7 @@ module.exports = (async function(bot, helpers) {
         let didLog = false;
 
         if (!member.roles.cache.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-            await newMember.roles.add(vcRole);
+            await member.roles.add(vcRole);
             await logUserEnteredVoice(user, newVoiceChannel);
             didLog = true;
         } else if (member.roles.cache.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
