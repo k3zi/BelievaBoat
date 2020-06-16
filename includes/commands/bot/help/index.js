@@ -17,6 +17,8 @@ module.exports = (async function(client, helpers) {
     exports.meta.examples = ['help'];
 
     exports.run = async (bot, message, arg) => {
+        let { dbGuild } = message;
+
         async function createEmbed(message, description, sentMessage) {
             const embed = new Discord.MessageEmbed()
                 .setTitle("Help | Available Commands:")
@@ -56,7 +58,7 @@ module.exports = (async function(client, helpers) {
             var commands = commandGroups[key];
             for (const command of commands.filter(c => c.examples)) {
                 commandText += "\n"
-                    + command.examples.map(e => "`" + bot.config.prefix + e + "`").join(' | ') + "\n";
+                    + command.examples.map(e => "`" + helpers.prefix(dbGuild, client) + e + "`").join(' | ') + "\n";
                     commandText += command.description + "\n";
             }
             // TODO: Replace this magic number.
