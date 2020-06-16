@@ -20,7 +20,7 @@ module.exports = (async function(client, helpers) {
 
     client.on(`ready`, () => {
         for (const [key, value] of Object.entries(emojis)) {
-            client.customEmojis[key] = client.emojis.get(value);
+            client.customEmojis[key] = client.emojis.cache.get(value);
         }
 
         client.helpers.log(`startup`, `main client: ${client.user.username} is online`);

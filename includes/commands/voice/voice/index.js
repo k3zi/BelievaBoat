@@ -125,36 +125,38 @@ module.exports = (async function(bot, helpers) {
         });
     });
 
-    bot.on('voiceStateUpdate', async (oldMember, newMember) => {
-        let vcRole = (oldMember.guild || newMember.guild).roles.filter(r => r.name.includes('In Voice')).first();
+    bot.on('voiceStateUpdate', async (oldState, newState) => {
+        const vcRole = (oldState.guild || newState.guild).roles.cache.filter(r => r.name.includes('In Voice')).first();
         if (!vcRole) {
             return;
         }
 
-        let newVoiceChannel = newMember.voiceChannel;
-        let oldVoiceChannel = oldMember.voiceChannel;
+        let newVoiceChannel = newState.channel;
+        let oldVoiceChannel = oldState.channel;
+        const member = newState.member;
+        const user = member.user;
 
-        var didLog = false;
+        let didLog = false;
 
-        if (!newMember.roles.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
+        if (!member.roles.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
             await newMember.roles.add(vcRole);
-            await logUserEnteredVoice(newMember.user, newVoiceChannel);
+            await logUserEnteredVoice(user, newVoiceChannel);
             didLog = true;
-        } else if (newMember.roles.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
-            await newMember.removeRole(vcRole);
+        } else if (member.roles.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
+            await member.removeRole(vcRole);
 
             if (oldVoiceChannel && !oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserExitedVoice(newMember.user, oldVoiceChannel);
+                await logUserExitedVoice(user, oldVoiceChannel);
             }
         }
 
         if (oldVoiceChannel && newVoiceChannel && oldVoiceChannel.id != newVoiceChannel.id) {
             if (!oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserExitedVoice(newMember.user, oldVoiceChannel);
+                await logUserExitedVoice(user, oldVoiceChannel);
             }
 
             if (!didLog && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserEnteredVoice(newMember.user, newVoiceChannel);
+                await logUserEnteredVoice(user, newVoiceChannel);
                 didLog = true;
             }
         }

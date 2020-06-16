@@ -74,7 +74,7 @@ helpers.formatUserMentionExtraString = function (user) {
 }
 
 helpers.generateErrorEmbed = function (client, user, error) {
-    var embed = new Discord.MessageEmbed();
+    let embed = new Discord.MessageEmbed();
     if (user) {
         embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL());
     }
