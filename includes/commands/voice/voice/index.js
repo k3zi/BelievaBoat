@@ -120,7 +120,7 @@ module.exports = (async function(bot, helpers) {
                     await member.roles.add(vcRole);
                 }
 
-                await logUserEnteredVoice(member.user, member.voiceChannel, true);
+                await logUserEnteredVoice(member.user, member.voice.channel, true);
             });
         });
     });
