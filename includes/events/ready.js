@@ -28,9 +28,12 @@ module.exports = (async function(client, helpers) {
     
         setInterval(() => {
             const randomName = uniqueNamesGenerator({
-                dictionaries: [adjectives, colors, [...animals, ...countries, ...names, ...starWars]], // colors can be omitted here as not used
-                length: 3
+                dictionaries: [adjectives, colors, [...animals, ...countries, ...names, ...starWars]],
+                length: 3,
+                separator: ' ',
+                style: 'capital'
             });
+            client.helpers.log(`random`, `setting status to: ${randomName}`);
             client.user.setStatus(randomName);
         }, 60000);
     });
