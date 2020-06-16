@@ -34,7 +34,7 @@ module.exports = (async function(client, helpers) {
                 style: 'capital'
             });
             client.helpers.log(`random`, `setting status to: ${randomName}`);
-            await client.user.setStatus(randomName);
+            client.user.setActivity(randomName);
         }, 60000);
     });
 
