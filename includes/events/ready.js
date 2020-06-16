@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
+const { uniqueNamesGenerator, adjectives, colors, animals, countries, names, starWars } = require('unique-names-generator');
 
 module.exports = (async function(client, helpers) {
     const exports = {};
@@ -24,7 +25,14 @@ module.exports = (async function(client, helpers) {
         }
 
         client.helpers.log(`startup`, `main client: ${client.user.username} is online`);
-        client.user.setActivity(`.help for help!`);
+    
+        setInterval(() => {
+            const randomName = uniqueNamesGenerator({
+                dictionaries: [adjectives, colors, [...animals, ...countries, ...names, ...starWars]], // colors can be omitted here as not used
+                length: 3
+            });
+            client.user.setStatus(randomName);
+        }, 60000);
     });
 
     return exports;

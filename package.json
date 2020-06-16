@@ -26,6 +26,7 @@
     "mongoose": "^5.9.19",
     "numeral": "^2.0.6",
     "path": "^0.12.7",
-    "sharp": "^0.25.4"
+    "sharp": "^0.25.4",
+    "unique-names-generator": "^4.2.0"
   }
 }
