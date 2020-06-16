@@ -44,11 +44,11 @@ module.exports = (async function(client, helpers) {
                 fields: rawEmbed.fields.map(f => _.pick(f, [`inline`, `name`, `value`])) 
             };
             console.log(rawEmbed);
-            embed = new Discord.RichEmbed(rawEmbed);
+            embed = new Discord.MessageEmbed(rawEmbed);
         } else {
             embed = client.helpers.generatePlainEmbed(client, message.author, retrievedMessage.content);
         }
-        embed = embed.setAuthor(`${sender.username}#${sender.discriminator}`, sender.displayAvatarURL);
+        embed = embed.setAuthor(`${sender.username}#${sender.discriminator}`, sender.displayAvatarURL());
         embed = embed.setColor(helpers.colors.info);
         embed = embed.setFooter(`${author.username}#${author.discriminator} | ${guild.name} → #${channel.name}`, author.displayAvatarURL);
         embed = embed.setTimestamp(retrievedMessage.createdAt);

@@ -117,7 +117,7 @@ module.exports = (async function(bot, helpers) {
 
             await Promise.map(vc.members.array(), async member => {
                 if (!member.roles.get(vcRole.id)) {
-                    await member.addRole(vcRole);
+                    await member.roles.add(vcRole);
                 }
 
                 await logUserEnteredVoice(member.user, member.voiceChannel, true);
@@ -137,7 +137,7 @@ module.exports = (async function(bot, helpers) {
         var didLog = false;
 
         if (!newMember.roles.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-            await newMember.addRole(vcRole);
+            await newMember.roles.add(vcRole);
             await logUserEnteredVoice(newMember.user, newVoiceChannel);
             didLog = true;
         } else if (newMember.roles.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
@@ -222,7 +222,7 @@ module.exports = (async function(bot, helpers) {
             return b.totalDuration - a.totalDuration;
         });
 
-        var embed = new Discord.RichEmbed();
+        var embed = new Discord.MessageEmbed();
         embed = embed.setTitle("Voice Statistics:");
         embed = embed.setColor([0, 0, 0]);
         embed = embed.setTimestamp();

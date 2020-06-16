@@ -78,7 +78,7 @@ module.exports = (async function(client, helpers) {
 
         const word = args[0].trim();
         const results = nhk.filter(e => e.kana === word || e.kanji.includes(word));
-        let embed = new Discord.RichEmbed().setTitle("Accent for: " + word).setTimestamp();
+        let embed = new Discord.MessageEmbed().setTitle("Accent for: " + word).setTimestamp();
         var combinedAccents = [];
         for (let result of results) {
             console.log(results);

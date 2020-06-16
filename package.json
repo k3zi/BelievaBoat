@@ -19,13 +19,13 @@
   "dependencies": {
     "akinator-api": "^1.0.1",
     "bluebird": "^3.7.2",
-    "discord.js": "^11.5.1",
+    "discord.js": "^12.2.0",
     "glob": "^7.1.6",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
-    "mongoose": "^5.8.10",
+    "moment": "^2.26.0",
+    "mongoose": "^5.9.19",
     "numeral": "^2.0.6",
     "path": "^0.12.7",
-    "sharp": "^0.24.0"
+    "sharp": "^0.25.4"
   }
 }

@@ -17,7 +17,7 @@ module.exports = (async function(client, helpers) {
     exports.meta.examples = ['help'];
 
     exports.run = async (bot, message, arg) => {
-        var embed = new Discord.RichEmbed().setTitle("Help | Here is a list of available commands:").setTimestamp();
+        var embed = new Discord.MessageEmbed().setTitle("Help | Here is a list of available commands:").setTimestamp();
         embed.setColor([0, 0, 0]);
         var description = "";
         var commandGroups = _.groupBy(bot.commands.array().map(c => c.meta), 'module');

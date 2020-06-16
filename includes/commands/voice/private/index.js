@@ -41,7 +41,7 @@ module.exports = (async function(bot, helpers) {
             count = -1;
         }
 
-        const user = message.guild.members.find("id", message.author.id);
+        const user = message.guild.members.find(m => m.id === message.author.id);
         const channel = await message.guild.createChannel((name && name.length) ? name : 'Private', 'voice', [{
             id: message.guild.id,
             deny: count === -1 ? ['CONNECT'] : [],
