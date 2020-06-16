@@ -26,7 +26,7 @@ module.exports = (async function(client, helpers) {
 
         client.helpers.log(`startup`, `main client: ${client.user.username} is online`);
     
-        setInterval(() => {
+        setInterval(async () => {
             const randomName = uniqueNamesGenerator({
                 dictionaries: [adjectives, colors, [...animals, ...countries, ...names, ...starWars]],
                 length: 3,
@@ -34,7 +34,7 @@ module.exports = (async function(client, helpers) {
                 style: 'capital'
             });
             client.helpers.log(`random`, `setting status to: ${randomName}`);
-            client.user.setStatus(randomName);
+            await client.user.setStatus(randomName);
         }, 60000);
     });
 
