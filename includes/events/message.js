@@ -34,6 +34,7 @@ module.exports = (async function(client, helpers) {
             if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
                 message.dbGuild = dbGuild;
                 let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
+                    console.log(error);
                     var embed = client.helpers.generateErrorEmbed(client, undefined, error);
                     embed = client.helpers.addSenderToFooter(embed, message, 'executed this request');
                     return await message.channel.send({ embed });
