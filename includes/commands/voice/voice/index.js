@@ -70,7 +70,7 @@ module.exports = (async function(bot, helpers) {
     }
 
     bot.on('ready', async () => {
-        let voiceChannels = bot.channels.array().filter(c => c.type === 'voice');
+        let voiceChannels = bot.channels.cache.array().filter(c => c.type === 'voice');
         let guilds = _.uniqBy(voiceChannels.map(vc =>vc.guild), 'id');
 
         let voiceChannelActivities = await VoiceChannelJoinActivity.find().where('duration').equals(0).exec();
