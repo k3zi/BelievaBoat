@@ -92,7 +92,7 @@ module.exports = (async function(bot, helpers) {
                 return;
             }
 
-            let vcRole = guild.roles.filter(r => r.name.includes('In Voice')).first();
+            let vcRole = guild.roles.cache.filter(r => r.name.includes('In Voice')).first();
             if (!vcRole) {
                 return;
             }
