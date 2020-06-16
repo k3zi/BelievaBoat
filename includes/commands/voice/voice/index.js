@@ -109,14 +109,14 @@ module.exports = (async function(bot, helpers) {
                 return;
             }
 
-            let vcRole = vc.guild.roles.filter(r => r.name.includes('In Voice')).first();
+            let vcRole = vc.guild.roles.cache.filter(r => r.name.includes('In Voice')).first();
 
             if (!vcRole) {
                 return;
             }
 
             await Promise.map(vc.members.array(), async member => {
-                if (!member.roles.get(vcRole.id)) {
+                if (!member.roles.cache.get(vcRole.id)) {
                     await member.roles.add(vcRole);
                 }
 
