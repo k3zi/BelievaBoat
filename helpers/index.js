@@ -408,4 +408,8 @@ helpers.parseActionForIn = async function (client, guild, arg) {
     return { action, value, forArg, inArg };
 }
 
+helpers.prefix = function (dbGuild, client) {
+    return (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
+};
+
 module.exports = helpers;

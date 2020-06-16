@@ -21,7 +21,7 @@ module.exports = (async function(client, helpers) {
             const embed = new Discord.MessageEmbed()
                 .setTitle("Help | Available Commands:")
                 .setTimestamp()
-                .setColor([0, 0, 0])
+                .setColor(helpers.colors.info)
                 .setDescription(description)
                 .setFooter('You can delete this by deleting the posted `.help` command.');
 
@@ -33,6 +33,7 @@ module.exports = (async function(client, helpers) {
         }
 
         async function addReactions(message, index, descriptions) {
+            await message.reactions.removeAll();
             if (index > 0) {
                 await message.react('⬅');
                 await Promise.delay(450);
@@ -85,7 +86,7 @@ module.exports = (async function(client, helpers) {
             let collector = sentMessage.createReactionCollector(filter);
             let stop = async () => {
                 collector.stop();
-                await sentMessage.clearReactions();
+                await sentMessage.reactions.removeAll();
             };
             let timer = setTimeout(stop, 15 * 1000);
             collector.on('collect', async r => {
