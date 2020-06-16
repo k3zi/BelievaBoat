@@ -72,7 +72,7 @@ module.exports = (async function(client, helpers) {
         }
 
         let index = 0;
-        createEmbed(message. descriptions[index]).then(async sentMessage => {
+        createEmbed(message, descriptions[index]).then(async sentMessage => {
             await bot.addDeleteWatchForMessage(exports.meta.name, message, sentMessage);
             const filter = (reaction, user) => {
                 if (user.id !== message.author.id) {
@@ -98,7 +98,7 @@ module.exports = (async function(client, helpers) {
                 } else if (r.emoji.name == '⬅') {
                     index -= 1;
                 }
-                sentMessage = await createEmbed(message. descriptions[index], sentMessage);
+                sentMessage = await createEmbed(message, descriptions[index], sentMessage);
                 await addReactions(sentMessage, index, descriptions);
     
                 clearTimeout(timer);
