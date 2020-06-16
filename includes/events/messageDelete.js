@@ -69,13 +69,13 @@ module.exports = (async function(client, helpers) {
 
         await Promise.map(watchInfos, async watchInfo => {
             await watchInfo.remove();
-            let commandfile = client.commands.get(watchInfo.command);
+            const commandfile = client.commands.get(watchInfo.command);
             if (!commandfile) {
                 return;
             }
 
-            let channel = await client.channels.get(watchInfo.sentMessage.channel.id);
-            let sentMessage = await channel.fetchMessage(watchInfo.sentMessage.id);
+            const channel = await client.channels.cache.get(watchInfo.sentMessage.channel.id);
+            const sentMessage = await channel.messages.fetch(watchInfo.sentMessage.id);
             return sentMessage.delete();
         });
     });

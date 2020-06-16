@@ -24,10 +24,10 @@ module.exports = (async function(client, helpers) {
         }
 
         let channel = message.mentions.channels.first() || message.channel;
-        var retrievedMessage = await channel.fetchMessage(args[0]).catch(() => false);
+        let retrievedMessage = await channel.messages.fetch(args[0]).catch(() => false);
 
         if (!retrievedMessage && args.length > 1) {
-            retrievedMessage = await channel.fetchMessage(args[1]).catch(() => false);
+            retrievedMessage = await channel.messages.fetch(args[1]).catch(() => false);
         }
 
         if (!retrievedMessage) {
@@ -35,8 +35,8 @@ module.exports = (async function(client, helpers) {
         }
 
         let author = retrievedMessage.author;
-        var embed;
-        var rawEmbed;
+        let embed;
+        let rawEmbed;
         if (rawEmbed = retrievedMessage.embeds.filter(e => e.type === `rich`)[0]) {
             let ommitedFields = _.pick(rawEmbed, [`description`, `hexColor`, `timestamp`, `title`, `url`]);
             rawEmbed = {
