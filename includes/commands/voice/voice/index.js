@@ -179,7 +179,7 @@ module.exports = (async function(bot, helpers) {
     exports.run = async (bot, message, arg) => {
         var member = message.member;
         if (arg.length != 0) {
-            member = message.guild.members.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
+            member = message.guild.members.cache.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
         }
 
         if (!member) {
@@ -233,7 +233,7 @@ module.exports = (async function(bot, helpers) {
         var j = 0;
         while (i < sortedAggrSet.length && j < 18) {
             let ele = sortedAggrSet[i];
-            let eleUser = message.guild.members.get(ele._id);
+            let eleUser = message.guild.members.cache.get(ele._id);
             if (eleUser) {
                 let hours = Math.round((ele.totalDuration / 1000 / 60 / 60) * 1000) / 1000;
                 embed = embed.addField(`${i + 1}) ${eleUser.displayName}`, `${hours} hours`, true);

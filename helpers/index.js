@@ -116,14 +116,14 @@ helpers.generateEmbed = function (client, user, message, success) {
 helpers.findUser = async function (guild, value) {
     value = value + '';
     if (guild.members.has(value)) {
-        return guild.members.get(value).user;
+        return guild.members.cache.get(value).user;
     }
 
     var match;
     if (match = value.match(/<@[!]?([0-9]+)>/)) {
         let userID = match[1];
         if (guild.members.has(userID)) {
-            return guild.members.get(userID).user;
+            return guild.members.cache.get(userID).user;
         }
 
         let user = await guild.client.fetch(userID);

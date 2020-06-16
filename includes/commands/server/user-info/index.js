@@ -21,7 +21,7 @@ module.exports = (async function(client, helpers) {
     exports.run = async (client, message, arg) => {
         var member = message.member;
         if (arg.length != 0) {
-            member = message.guild.members.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
+            member = message.guild.members.cache.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
         }
 
         client.helpers.log(`command`, `displaying profile: ${member}`);
