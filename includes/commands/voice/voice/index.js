@@ -99,7 +99,7 @@ module.exports = (async function(bot, helpers) {
 
             return Promise.map(vcRole.members.array(), async member => {
                 if (!member.voiceChannel || member.voiceChannel.parent.name.toLowerCase().includes('staff')) {
-                    return member.removeRole(vcRole);
+                    return member.roles.remove(vcRole);
                 }
             });
         });
@@ -143,7 +143,7 @@ module.exports = (async function(bot, helpers) {
             await logUserEnteredVoice(user, newVoiceChannel);
             didLog = true;
         } else if (member.roles.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
-            await member.removeRole(vcRole);
+            await member.roles.remove(vcRole);
 
             if (oldVoiceChannel && !oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
                 await logUserExitedVoice(user, oldVoiceChannel);
