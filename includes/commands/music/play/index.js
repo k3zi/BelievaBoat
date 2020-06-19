@@ -48,7 +48,7 @@ module.exports = (async function(client, helpers) {
         const videoObject = await search(searchTerm);
         if (videoObject) {
             const videoId = videoObject.id.videoId;
-            const connection = await channel.join();
+            let connection = await channel.join();
             const url = `https://www.youtube.com/watch?v=${videoId}`;
             
             console.log(`play -> playing: (${videoId})`);
