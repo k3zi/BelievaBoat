@@ -45,7 +45,7 @@ module.exports = (async function(bot, helpers) {
 
     async function logUserStartedSpeaking(user, channel) {
         let voiceChannelActivity = new VoiceChannelSpeakActivity({
-            userId: user.id,
+            userID: user.id,
             channelID: channel.id
         });
         await voiceChannelActivity.save();
@@ -163,16 +163,12 @@ module.exports = (async function(bot, helpers) {
     });
 
     bot.on('guildMemberSpeaking', async (member, speaking) => {
-        if (member.voiceChannel.parent.name.toLowerCase().includes('staff')) {
-            return;
-        }
-
         console.log(`guildMemberSpeaking ⇒ ${member.user.username}: ${speaking ? 'yes' : 'no'}`);
 
         if (speaking) {
-            await logUserStartedSpeaking(member.user, member.voiceChannel);
+            await logUserStartedSpeaking(member.user, member.voice.channel);
         } else {
-            await logUserStoppedSpeaking(member.user, member.voiceChannel);
+            await logUserStoppedSpeaking(member.user, member.voice.channel);
         }
     });
 
