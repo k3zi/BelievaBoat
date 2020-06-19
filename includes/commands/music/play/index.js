@@ -38,7 +38,7 @@ module.exports = (async function(client, helpers) {
             return;
         }
 
-        const channel = message.voice.channel;
+        const channel = message.member.voice.channel;
         if (!channel) {
             return;
         }
