@@ -52,8 +52,7 @@ module.exports = (async function(client, helpers) {
             const url = `https://www.youtube.com/watch?v=${videoId}`;
             
             console.log(`play -> playing: (${videoId})`);
-            let voiceBot, connection;
-            voiceBot = channel.members.first(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.get(message.member.voice.channelID).connection));
+            let voiceBot = channel.members.first(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.get(message.member.voice.channelID).connection));
             if (!voiceBot) {
                 let availableBots = await client.loopUntilBotAvailable(message.guild);
                 voiceBot = availableBots[0];
