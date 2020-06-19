@@ -61,12 +61,12 @@ module.exports = (async function(client, helpers) {
                 console.log(availableBots);
                 
                 voiceBot = availableBots[0];
-                let voiceBotChannel = voiceBot.channels.get(message.member.voice.channelID);
+                let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
                 connection = await voiceBotChannel.join();
             }
 
             console.log(voiceBot);
-            let voiceBotChannel = voiceBot.channels.get(message.member.voice.channelID);
+            let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
             connection = voiceBotChannel.connection || (await voiceBotChannel.join());
             connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
         }
