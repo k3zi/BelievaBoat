@@ -48,12 +48,14 @@ module.exports = (async function(client, helpers) {
         const videoObject = await search(searchTerm);
         if (videoObject) {
             const videoId = videoObject.id.videoId;
-            let connection = await channel.join();
             const url = `https://www.youtube.com/watch?v=${videoId}`;
             
             console.log(`play -> playing: (${videoId})`);
+            console.log(client.potentialBots);
+            console.log(channel.members);
             let voiceBot = channel.members.first(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.get(message.member.voice.channelID).connection));
             console.log(voiceBot);
+            let connection;
             if (!voiceBot) {
                 let availableBots = await client.loopUntilBotAvailable(message.guild);
                 console.log(availableBots);
