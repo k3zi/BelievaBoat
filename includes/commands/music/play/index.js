@@ -53,7 +53,7 @@ module.exports = (async function(client, helpers) {
             console.log(`play -> playing: (${videoId})`);
             console.log(client.potentialBots);
             console.log(channel.members);
-            let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.get(message.member.voice.channelID).connection));
+            let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
             console.log(voiceBot);
             let connection;
             if (!voiceBot) {
