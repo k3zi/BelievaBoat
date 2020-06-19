@@ -20,6 +20,7 @@
     "akinator-api": "^1.0.1",
     "bluebird": "^3.7.2",
     "discord.js": "^12.2.0",
+    "ffmpeg-static": "^4.2.4",
     "glob": "^7.1.6",
     "lodash": "^4.17.15",
     "moment": "^2.26.0",
@@ -27,6 +28,9 @@
     "numeral": "^2.0.6",
     "path": "^0.12.7",
     "sharp": "^0.25.4",
-    "unique-names-generator": "^4.2.0"
+    "unique-names-generator": "^4.2.0",
+    "youtube-dl": "^3.0.2",
+    "youtube-node": "^1.3.3",
+    "ytdl-core-discord": "^1.2.0"
   }
 }

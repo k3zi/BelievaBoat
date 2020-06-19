@@ -55,19 +55,23 @@ module.exports = (async function(client, helpers) {
         for (const key of Object.keys(commandGroups).filter(k => k && (typeof k !== 'undefined') && k != 'undefined' && k.length).sort((a, b) => a.localeCompare(b))) {
             let commandText = '';
             commandText += `\n**${key}**`;
-            var commands = commandGroups[key];
+            const commands = commandGroups[key];
             for (const command of commands.filter(c => c.examples)) {
                 commandText += "\n"
                     + command.examples.map(e => "`" + helpers.prefix(dbGuild, client) + e + "`").join(' | ') + "\n";
                     commandText += command.description + "\n";
-            }
-            // TODO: Replace this magic number.
-            if ((description + commandText).length > 2048) {
-                descriptions.push(description);
-                description = '';
-            }
+                
+                if ((description + commandText).length > 2048) {
+                    descriptions.push(description);
+                    description = '';
 
-            description += commandText;
+                    description += commandText;
+                    commandText = `\n**${key}**`;
+                } else {
+                    description += commandText;
+                    commandText = '';
+                }
+            }
         }
 
         if (description.length > 0) {

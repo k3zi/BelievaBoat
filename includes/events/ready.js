@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Promise = require('bluebird');
 const { uniqueNamesGenerator, adjectives, colors, animals, countries, names, starWars } = require('unique-names-generator');
 
-module.exports = (async function(client, helpers) {
+module.exports = async function(client, helpers) {
     const exports = {};
 
     const db = client.db;
@@ -39,4 +39,4 @@ module.exports = (async function(client, helpers) {
     });
 
     return exports;
-});
+};

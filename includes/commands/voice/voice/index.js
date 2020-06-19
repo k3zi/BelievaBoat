@@ -71,7 +71,7 @@ module.exports = (async function(bot, helpers) {
 
     bot.on('ready', async () => {
         let voiceChannels = bot.channels.cache.array().filter(c => c.type === 'voice');
-        let guilds = _.uniqBy(voiceChannels.map(vc =>vc.guild), 'id');
+        let guilds = _.uniqBy(voiceChannels.map(vc => vc.guild), 'id');
 
         let voiceChannelActivities = await VoiceChannelJoinActivity.find().where('duration').equals(0).exec();
 
@@ -202,9 +202,7 @@ module.exports = (async function(bot, helpers) {
                             if: {
                                 $eq: ['$duration', 0]
                             },
-                            then: {
-                                $subtract: [new Date(), "$start"]
-                            },
+                            then: '$duration',
                             else: '$duration'
                         }
                     }
@@ -226,7 +224,7 @@ module.exports = (async function(bot, helpers) {
 
         var embed = new Discord.MessageEmbed();
         embed = embed.setTitle("Voice Statistics:");
-        embed = embed.setColor([0, 0, 0]);
+        embed = embed.setColor(helpers.colors.info);
         embed = embed.setTimestamp();
 
         var i = 0;

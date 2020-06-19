@@ -93,7 +93,6 @@ module.exports = (async function(client, helpers) {
             const usageOutput = result.usage ? `（${result.usage}）` : '';
             combinedAccents.push(`${result.kana}${kanjiOutput}${usageOutput}\n${accents.join('\n')}`)
         }
-        console.log(combinedAccents);
 
         embed = embed.setDescription(combinedAccents.join('\n\n'));
         embed = embed.setColor(client.helpers.colors.info);

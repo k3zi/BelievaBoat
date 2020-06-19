@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
 
-module.exports = (async function(client, helpers) {
+module.exports = async function(client, helpers) {
     const exports = {};
 
     const db = client.db;
@@ -12,4 +12,4 @@ module.exports = (async function(client, helpers) {
     });
 
     return exports;
-});
+};

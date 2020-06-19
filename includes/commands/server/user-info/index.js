@@ -50,7 +50,7 @@ module.exports = (async function(client, helpers) {
         let embed = new Discord.MessageEmbed();
         embed = embed.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
             .setDescription(`${emojis[member.user.presence.status]} ${member}`)
-            .setColor([0, 0, 0])
+            .setColor(helpers.colors.info)
             .addField('User ID', member.user.id, false)
             .addField('Joined Discord', `${moment(member.user.createdAt).format('LLLL')} (${moment(member.user.createdAt).fromNow()})`, true)
             .addField('Joined Server', `${moment(member.joinedAt).format('LLLL')} (${moment(member.joinedAt).fromNow()})`, true)
