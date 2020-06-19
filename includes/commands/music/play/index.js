@@ -60,6 +60,7 @@ module.exports = (async function(client, helpers) {
                 connection = await voiceBotChannel.join();
             }
 
+            console.log(voiceBot);
             let voiceBotChannel = voiceBot.channels.get(message.member.voice.channelID);
             connection = voiceBotChannel.connection || (await voiceBotChannel.join());
             connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
