@@ -6,8 +6,9 @@ const ytdl = require('ytdl-core-discord');
 
 class GuildMusicManager {
 
-    constructor(client, guild, channel, connection) {
+    constructor(client, helpers, guild, channel, connection) {
         this.client = client;
+        this.helpers = helpers;
         this.guild = guild;
         this.channel = channel;
         this.connection = connection;
@@ -46,7 +47,7 @@ class GuildMusicManager {
             self.playNext();
         });
 
-        this.channel.send(helpers.generateEmbed(client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
+        this.channel.send(this.helpers.generateEmbed(client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         connection.play(output, { type: 'opus', volume: 0.5 });
     }
 
@@ -116,7 +117,7 @@ module.exports = (async function(client, helpers) {
 
         let manager = client.musicManagers.get(message.guild.id);
         if (!manager) {
-            manager = new GuildMusicManager(client, message.guild, message.channel, connection);
+            manager = new GuildMusicManager(client, helpers, message.guild, message.channel, connection);
             client.musicManagers.set(message.guild.id, manager);
         }
 
