@@ -38,7 +38,13 @@ class GuildMusicManager {
         const self = this;
         const nextSong = this.queue.shift();
         const url = `https://www.youtube.com/watch?v=${nextSong.videoID}`;
-        const output = await ytdl(url, { filter: 'audioonly' })
+        const output = await ytdl(url, { filter: 'audioonly' });
+
+        this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
+        this.connection.play(output, { 
+            volume: 0.5,
+            highWaterMark: 64
+        })
             .on('error', (e) => {
                 console.log(e);
                 self.playNext();
@@ -47,9 +53,6 @@ class GuildMusicManager {
                 console.log('finished song');
                 self.playNext();
             });
-
-        this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
-        this.connection.play(output, { volume: 0.5 });
     }
 
   }
