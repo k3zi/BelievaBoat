@@ -43,7 +43,7 @@ module.exports = (async function(client, helpers) {
                     sentMessage = await message.channel.send({ embed });
                 }
 
-                if (sentMessage && message.guild.me.hasPermission('MANAGE_MESSAGES')) {
+                if (sentMessage) {
                     console.log('adding message delete watch');
                     await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
                 }

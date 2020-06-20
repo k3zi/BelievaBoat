@@ -9,6 +9,7 @@ class GuildMusicManager {
     constructor(client, guild, channel, connection) {
         this.client = client;
         this.guild = guild;
+        this.channel = channel;
         this.connection = connection;
         this.isPlaying = false;
         this.queue = [];
@@ -101,8 +102,6 @@ module.exports = (async function(client, helpers) {
         
         console.log(`play -> playing: (${videoId}) ${videoTitle}`);
         console.log(channel.members.array().map(m => m.user.id));
-        console.log(!!channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id)));
-        console.log(!!channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id))));
         let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id)));
         let connection;
         if (!voiceBot) {
