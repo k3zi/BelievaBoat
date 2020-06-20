@@ -36,10 +36,14 @@ module.exports = (async function(client, helpers) {
         embed = embed.addField(`# of Members:`, users, true);
 
         let userStatuses = ``;
-        userStatuses += `${client.customEmojis.online} \`${numeral(guild.presences.cache.filter(p => p.status === `online`).size).format('0,0')}\``;
-        userStatuses += `\n${client.customEmojis.offline} \`${numeral(guild.presences.cache.filter(p => p.status === `offline`).size).format('0,0')}\``;
-        userStatuses += `\n${client.customEmojis.idle} \`${numeral(guild.presences.cache.filter(p => p.status === `idle`).size).format('0,0')}\``;
-        userStatuses += `\n${client.customEmojis.dnd} \`${numeral(guild.presences.cache.filter(p => p.status === `dnd`).size).format('0,0')}\``;
+        const onlineCount = guild.presences.cache.filter(p => p.status === `online`).size;
+        const idleCount = guild.presences.cache.filter(p => p.status === `idle`).size;
+        const dndCount = guild.presences.cache.filter(p => p.status === `dnd`).size;
+        const offlineCount = guild.memberCount - onlineCount - idleCount - dndCount;
+        userStatuses += `${client.customEmojis.online} \`${numeral(onlineCount).format('0,0')}\``;
+        userStatuses += `\n${client.customEmojis.offline} \`${numeral(offlineCount).format('0,0')}\``;
+        userStatuses += `\n${client.customEmojis.idle} \`${numeral(idleCount).format('0,0')}\``;
+        userStatuses += `\n${client.customEmojis.dnd} \`${numeral(dndCount).format('0,0')}\``;
         embed = embed.addField(`User Statuses:`, userStatuses, true);
 
         let channels = ``;
