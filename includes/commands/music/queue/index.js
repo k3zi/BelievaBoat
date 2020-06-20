@@ -15,15 +15,6 @@ module.exports = (async function(client, helpers) {
     exports.meta.aliases = ['upcoming'];
 
     exports.run = async (client, message, arg) => {
-        if (arg.length === 0) {
-            throw new Error('No argument provided.');
-        }
-
-        const volume = parseFloat(arg);
-        if (isNaN(volume) || volume < 0 || volume > 1) {
-            throw new Error('Invalid argument provided.');
-        }
-        
         const channel = message.member.voice.channel;
         if (!channel) {
             throw new Error('Please join a voice channel first.');
