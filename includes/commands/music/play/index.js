@@ -42,10 +42,9 @@ class GuildMusicManager {
         const output = ytdl(url, {
             filter: "audioonly",
             opusEncoded: true,
-            encoderArgs: ['-af']
+            encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
         });
 
-        console.log(`play -> playing: (${nextSong.videoID}) ${nextSong.title}`);
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         this.connection.play(output, { 
             volume: this.volume,
@@ -57,8 +56,10 @@ class GuildMusicManager {
                 self.playNext();
             })
             .on('finish', () => {
+                console.log('finished playing song');
                 self.playNext();
             });
+        this.setVolume(this.volume);
     }
 
     setVolume(newVolume) {
