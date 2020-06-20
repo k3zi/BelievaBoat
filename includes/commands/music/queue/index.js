@@ -32,7 +32,7 @@ module.exports = (async function(client, helpers) {
         embed = embed.setColor(client.helpers.colors.info);
 
         const description = upcoming.length > 0 
-            ? upcoming.map((s, i) => `${s+1}. [${s.videoID}] ${s.title} queued by ${s.user}`).join('\n')
+            ? upcoming.map((s, i) => `${i+1}. [${s.videoID}] ${s.title} queued by ${s.user}`).join('\n')
             : "No songs currently queued.";
         embed = embed.setDescription(description);
         return message.channel.send(embed);
