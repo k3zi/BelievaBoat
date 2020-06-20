@@ -50,7 +50,7 @@ module.exports = (async function(client, helpers) {
             const videoId = videoObject.id.videoId;
             const url = `https://www.youtube.com/watch?v=${videoId}`;
             
-            console.log(`play -> playing: (${videoId})`);
+            console.log(`play -> playing: ${videoId}`);
             let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
             let connection;
             if (!voiceBot) {
