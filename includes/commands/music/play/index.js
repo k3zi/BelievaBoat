@@ -111,7 +111,6 @@ module.exports = (async function(client, helpers) {
 
         let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
         connection = voiceBotChannel.connection || (await voiceBotChannel.join());
-        connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
 
         let manager = client.musicManagers.get(message.guild.id);
         if (!manager) {
