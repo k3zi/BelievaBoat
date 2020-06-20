@@ -100,7 +100,10 @@ module.exports = (async function(client, helpers) {
         const videoTitle = videoObject.snippet.title;
         
         console.log(`play -> playing: (${videoId}) ${videoTitle}`);
-        let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
+        console.log(channel.members.array().map(m => m.user.id));
+        console.log(!!channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id)));
+        console.log(!!channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id))));
+        let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id)));
         let connection;
         if (!voiceBot) {
             let availableBots = await client.loopUntilBotAvailable(message.guild);
