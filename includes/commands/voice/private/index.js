@@ -32,8 +32,8 @@ module.exports = (async function(bot, helpers) {
         var count = args.shift();
         var name = args.join(' ');
 
-        if (!message.member.voiceChannel) {
-            return message.reply('Please join a voice channel first. まずボイスチャットに入ってください。');
+        if (!message.member.voice.channel) {
+            return message.reply('Please join a voice channel first.');
         }
 
         if (!count || isNaN(count))  {
@@ -41,7 +41,7 @@ module.exports = (async function(bot, helpers) {
             count = -1;
         }
 
-        const user = message.guild.members.find(m => m.id === message.author.id);
+        const user = message.guild.members.cache.find(m => m.id === message.author.id);
         const channel = await message.guild.createChannel((name && name.length) ? name : 'Private', 'voice', [{
             id: message.guild.id,
             deny: count === -1 ? ['CONNECT'] : [],

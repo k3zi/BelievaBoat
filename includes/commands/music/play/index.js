@@ -35,35 +35,36 @@ module.exports = (async function(client, helpers) {
 
     exports.run = async (client, message, arg) => {
         if (arg.length === 0) {
-            return;
+            throw new Error('No arguments provided.');
         }
 
         const channel = message.member.voice.channel;
         if (!channel) {
-            return;
+            throw new Error('Please join a voice channel first.');
         }
 
         const searchTerm = arg;
 
         const videoObject = await search(searchTerm);
-        if (videoObject) {
-            const videoId = videoObject.id.videoId;
-            const url = `https://www.youtube.com/watch?v=${videoId}`;
-            
-            console.log(`play -> playing: ${videoId}`);
-            let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
-            let connection;
-            if (!voiceBot) {
-                let availableBots = await client.loopUntilBotAvailable(message.guild);
-                voiceBot = availableBots[0];
-                let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
-                connection = await voiceBotChannel.join();
-            }
-
-            let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
-            connection = voiceBotChannel.connection || (await voiceBotChannel.join());
-            connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
+        if (!videoObject) {
+            throw new Error('No results found.');
         }
+        const videoId = videoObject.id.videoId;
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        
+        console.log(`play -> playing: ${videoId}`);
+        let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
+        let connection;
+        if (!voiceBot) {
+            let availableBots = await client.loopUntilBotAvailable(message.guild);
+            voiceBot = availableBots[0];
+            let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
+            connection = await voiceBotChannel.join();
+        }
+
+        let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
+        connection = voiceBotChannel.connection || (await voiceBotChannel.join());
+        connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
 
         // let queuedTrack = new QueuedTrack({
         //     channel: {

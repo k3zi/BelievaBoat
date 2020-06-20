@@ -33,12 +33,15 @@ module.exports = (async function(client, helpers) {
             let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
             if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
                 message.dbGuild = dbGuild;
-                let sentMessage = await commandfile.run(client, message, arg).catch(async error => {
+                let sentMessage;
+                try {
+                    sentMessage = await commandfile.run(client, message, arg);
+                } catch (error) {
                     console.log(error);
-                    var embed = client.helpers.generateErrorEmbed(client, undefined, error);
+                    let embed = client.helpers.generateErrorEmbed(client, undefined, error);
                     embed = client.helpers.addSenderToFooter(embed, message, 'executed this request');
-                    return await message.channel.send({ embed });
-                });
+                    sentMessage = await message.channel.send({ embed });
+                }
 
                 if (sentMessage && message.guild.me.hasPermission('MANAGE_MESSAGES')) {
                     await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
