@@ -30,8 +30,10 @@ class GuildMusicManager {
 
     async playNext() {
         if (this.queue.length === 0) {
+            this.isPlaying = false;
             return;
         }
+        this.isPlaying = true;
         
         const self = this;
         const nextSong = this.queue.shift();
@@ -48,7 +50,7 @@ class GuildMusicManager {
         });
 
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
-        connection.play(output, { type: 'opus', volume: 0.5 });
+        this.connection.play(output, { type: 'opus', volume: 0.5 });
     }
 
   }
