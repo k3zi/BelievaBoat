@@ -44,6 +44,7 @@ module.exports = (async function(client, helpers) {
                 }
 
                 if (sentMessage && message.guild.me.hasPermission('MANAGE_MESSAGES')) {
+                    console.log('adding message delete watch');
                     await client.addDeleteWatchForMessage(commandfile.meta.name, message, sentMessage);
                 }
             }

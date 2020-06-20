@@ -18,7 +18,7 @@ class GuildMusicManager {
         this.queue.push({
             videoID,
             title,
-            member
+            user
         });
         
         if (!this.isPlaying) {
