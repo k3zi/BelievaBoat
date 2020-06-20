@@ -47,7 +47,7 @@ class GuildMusicManager {
             self.playNext();
         });
 
-        this.channel.send(this.helpers.generateEmbed(client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
+        this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         connection.play(output, { type: 'opus', volume: 0.5 });
     }
 
