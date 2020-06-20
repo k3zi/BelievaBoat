@@ -4,6 +4,53 @@ const _ = require('lodash');
 const YouTube = require('youtube-node');
 const ytdl = require('ytdl-core-discord');
 
+class GuildMusicManager {
+
+    constructor(client, guild, channel, connection) {
+        this.client = client;
+        this.guild = guild;
+        this.connection = connection;
+        this.isPlaying = false;
+        this.queue = [];
+    }
+
+    async queueSong(videoID, title, user) {
+        this.queue.push({
+            videoID,
+            title,
+            member
+        });
+        
+        if (!this.isPlaying) {
+            await this.playNext();
+        }
+    }
+
+    async playNext() {
+        if (this.queue.length === 0) {
+            return;
+        }
+        
+        const self = this;
+        const nextSong = this.queue.shift();
+        const url = `https://www.youtube.com/watch?v=${nextSong.videoID}`;
+        const output = await ytdl(url);
+
+        output.on('error', (e) => {
+            console.log(e);
+            self.playNext();
+        });
+        output.on('end', () => {
+            console.log('finished song');
+            self.playNext();
+        });
+
+        this.channel.send(helpers.generateEmbed(client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
+        connection.play(output, { type: 'opus', volume: 0.5 });
+    }
+
+  }
+
 module.exports = (async function(client, helpers) {
     let exports = {};
 
@@ -50,9 +97,9 @@ module.exports = (async function(client, helpers) {
             throw new Error('No results found.');
         }
         const videoId = videoObject.id.videoId;
-        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        const videoTitle = videoObject.snippet.title;
         
-        console.log(`play -> playing: ${videoId}`);
+        console.log(`play -> playing: (${videoId}) ${videoTitle}`);
         let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
         let connection;
         if (!voiceBot) {
@@ -65,6 +112,15 @@ module.exports = (async function(client, helpers) {
         let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
         connection = voiceBotChannel.connection || (await voiceBotChannel.join());
         connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
+
+        let manager = client.musicManagers.get(message.guild.id);
+        if (!manager) {
+            manager = new GuildMusicManager(client, message.guild, message.channel, connection);
+            client.musicManagers.set(messaege.guild.id, manager);
+        }
+
+        message.channel.send(helpers.generateEmbed(client, message.author, `Queued: ${videoTitle}`,  true));
+        await manager.queueSong(videoId, videoTitle, message.author);
 
         // let queuedTrack = new QueuedTrack({
         //     channel: {

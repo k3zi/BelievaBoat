@@ -237,9 +237,7 @@ module.exports = (async function(bot, helpers) {
             i++;
         };
 
-        await message.channel.send({embed}).then(async sentMessage => {
-            await bot.addDeleteWatchForMessage(exports.meta.name, message, sentMessage);
-        });
+        return message.channel.send({embed});
     };
 
     return exports;
