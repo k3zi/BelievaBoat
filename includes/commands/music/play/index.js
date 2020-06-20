@@ -34,7 +34,7 @@ class GuildMusicManager {
             return;
         }
         this.isPlaying = true;
-        
+
         const self = this;
         const nextSong = this.queue.shift();
         const url = `https://www.youtube.com/watch?v=${nextSong.videoID}`;
@@ -105,8 +105,14 @@ module.exports = (async function(client, helpers) {
         
         console.log(`play -> playing: (${videoId}) ${videoTitle}`);
         console.log(channel.members.array().map(m => m.user.id));
-        let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id)));
+        let voiceBot;
         let connection;
+
+        let voiceBotMember = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id)));
+        if (voiceBotMember) {
+            voiceBot = client.potentialBots.first(b => b.user.id === voiceBotMember.user.id);
+        }
+        
         if (!voiceBot) {
             let availableBots = await client.loopUntilBotAvailable(message.guild);
             voiceBot = availableBots[0];
