@@ -1,8 +1,6 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require('lodash');
-const YouTube = require('youtube-node');
-const ytdl = require('ytdl-core');
 
 module.exports = (async function(client, helpers) {
     let exports = {};

@@ -1,15 +1,11 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require('lodash');
-const YouTube = require('youtube-node');
-const ytdl = require('ytdl-core');
 
 module.exports = (async function(client, helpers) {
     let exports = {};
 
     const db = client.db;
-    const MessageDeleteWatch = db.model('MessageDeleteWatch');
-    const QueuedTrack = db.model('QueuedTrack');
 
     exports.meta = {};
     exports.meta.name = 'skip';
@@ -29,8 +25,8 @@ module.exports = (async function(client, helpers) {
             throw new Error('Not currently playing.');
         }
 
+        await message.channel.send(helpers.generateEmbed(client, message.author, `Skipped.`,  true));
         manager.playNext();
-        message.channel.send(helpers.generateEmbed(client, message.author, `Skipped.`,  true));
     };
 
     return exports;
