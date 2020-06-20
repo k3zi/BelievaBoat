@@ -110,7 +110,7 @@ module.exports = (async function(client, helpers) {
 
         let voiceBotMember = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.voice.connections.find(c => c.channel.id === channel.id)));
         if (voiceBotMember) {
-            voiceBot = client.potentialBots.first(b => b.user.id === voiceBotMember.user.id);
+            voiceBot = client.potentialBots.find(b => b.user.id === voiceBotMember.user.id);
         }
         
         if (!voiceBot) {
