@@ -19,10 +19,6 @@ module.exports = (async function(client, helpers) {
     exports.meta.aliases = [''];
 
     exports.run = async (client, message, arg) => {
-        if (arg.length === 0) {
-            throw new Error('No arguments provided.');
-        }
-
         const channel = message.member.voice.channel;
         if (!channel) {
             throw new Error('Please join a voice channel first.');
