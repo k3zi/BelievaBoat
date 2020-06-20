@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const YouTube = require('youtube-node');
-const ytdl = require('ytdl-core');
+const ytdl = require("discord-ytdl-core");
 
 class GuildMusicManager {
 
@@ -39,19 +39,23 @@ class GuildMusicManager {
         const self = this;
         const nextSong = this.queue.shift();
         const url = `https://www.youtube.com/watch?v=${nextSong.videoID}`;
-        const output = await ytdl(url, { filter: 'audioonly' });
+        const output = ytdl(url, {
+            filter: "audioonly",
+            opusEncoded: true,
+            encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
+        });
 
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         this.connection.play(output, { 
-            volume: 0.5,
-            highWaterMark: 64
+            volume: this.volume,
+            type: "opus"
         })
             .on('error', (e) => {
                 console.log(e);
                 self.playNext();
             })
-            .on('end', () => {
-                console.log('finished song');
+            .on('finish', () => {
+                console.log('finished playing song');
                 self.playNext();
             });
         this.setVolume(this.volume);

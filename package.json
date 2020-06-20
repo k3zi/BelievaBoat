@@ -20,6 +20,7 @@
     "@discordjs/opus": "^0.3.2",
     "akinator-api": "^1.0.1",
     "bluebird": "^3.7.2",
+    "discord-ytdl-core": "^4.0.0",
     "discord.js": "^12.2.0",
     "ffmpeg-static": "^4.2.4",
     "glob": "^7.1.6",
