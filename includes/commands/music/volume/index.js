@@ -8,17 +8,24 @@ module.exports = (async function(client, helpers) {
     let exports = {};
 
     const db = client.db;
-    const MessageDeleteWatch = db.model('MessageDeleteWatch');
-    const QueuedTrack = db.model('QueuedTrack');
 
     exports.meta = {};
-    exports.meta.name = 'skip';
-    exports.meta.description = 'Skips the currently playing song.';
+    exports.meta.name = 'volume';
+    exports.meta.description = 'Adjusts the bots volume.';
     exports.meta.module = 'music';
-    exports.meta.examples = ['skip'];
+    exports.meta.examples = ['volume 0.5'];
     exports.meta.aliases = [];
 
     exports.run = async (client, message, arg) => {
+        if (arg.length === 0) {
+            throw new Error('No argument provided.');
+        }
+
+        const volume = parseFloat(arg);
+        if (isNaN(volume) || volume < 0 || volume > 1) {
+            throw new Error('Invalid argument provided.');
+        }
+        
         const channel = message.member.voice.channel;
         if (!channel) {
             throw new Error('Please join a voice channel first.');
@@ -29,8 +36,8 @@ module.exports = (async function(client, helpers) {
             throw new Error('Not currently playing.');
         }
 
-        manager.playNext();
-        message.channel.send(helpers.generateEmbed(client, message.author, `Skipped.`,  true));
+        manager.setVolume(volume);
+        message.channel.send(helpers.generateEmbed(client, message.author, `Updated Volume.`,  true));
     };
 
     return exports;

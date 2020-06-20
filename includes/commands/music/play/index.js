@@ -12,6 +12,7 @@ class GuildMusicManager {
         this.guild = guild;
         this.channel = channel;
         this.connection = connection;
+        this.volume = 0.5;
         this.isPlaying = false;
         this.queue = [];
     }
@@ -53,6 +54,15 @@ class GuildMusicManager {
                 console.log('finished song');
                 self.playNext();
             });
+        this.setVolume(this.volume);
+    }
+
+    setVolume(newVolume) {
+        this.volume = newVolume;
+        const dispatcher = this.connection.dispatcher;
+        if (!dispatcher) {
+            dispatcher.setVolumeLogarithmic(newVolume);
+        }
     }
 
   }
@@ -61,15 +71,13 @@ module.exports = (async function(client, helpers) {
     let exports = {};
 
     const db = client.db;
-    const MessageDeleteWatch = db.model('MessageDeleteWatch');
-    const QueuedTrack = db.model('QueuedTrack');
 
     exports.meta = {};
     exports.meta.name = 'play';
     exports.meta.description = 'Shows statistics about voice participants';
     exports.meta.module = 'music';
     exports.meta.examples = ['play Justin Bieber Baby'];
-    exports.meta.aliases = [''];
+    exports.meta.aliases = [];
 
     async function search(term) {
         const youTube = new YouTube();
