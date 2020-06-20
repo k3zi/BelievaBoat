@@ -18,7 +18,7 @@ module.exports = (async function(client, helpers) {
     exports.run = async (client, message, arg) => {
         let { dbGuild, guild } = message;
 
-        var embed = new Discord.MessageEmbed();
+        let embed = new Discord.MessageEmbed();
         embed = embed.setTitle(guild.name);
         embed = embed.setImage(guild.iconURL);
         embed = embed.setColor(client.helpers.colors.info);
@@ -29,24 +29,24 @@ module.exports = (async function(client, helpers) {
 
         embed = embed.addField('\u200b', '\u200b');
 
-        var users = ``;
-        users += `All - \`${numeral(guild.members.size).format('0,0')}\``;
-        users += `\nHuman - \`${numeral(guild.members.filter(m => !m.user.bot).size).format('0,0')}\``;
-        users += `\nBot - \`${numeral(guild.members.filter(m => m.user.bot).size).format('0,0')}\``;
+        let users = ``;
+        users += `All - \`${numeral(guild.memberCount).format('0,0')}\``;
+        users += `\nHuman - \`${numeral(guild.members.cache.filter(m => !m.user.bot).size).format('0,0')}\``;
+        users += `\nBot - \`${numeral(guild.members.cache.filter(m => m.user.bot).size).format('0,0')}\``;
         embed = embed.addField(`# of Members:`, users, true);
 
-        var userStatuses =  ``;
-        userStatuses += `${client.customEmojis.online} \`${numeral(guild.presences.filter(p => p.status === `online`).size).format('0,0')}\``;
-        userStatuses += `\n${client.customEmojis.offline} \`${numeral(guild.presences.filter(p => p.status === `offline`).size).format('0,0')}\``;
-        userStatuses += `\n${client.customEmojis.idle} \`${numeral(guild.presences.filter(p => p.status === `idle`).size).format('0,0')}\``;
-        userStatuses += `\n${client.customEmojis.dnd} \`${numeral(guild.presences.filter(p => p.status === `dnd`).size).format('0,0')}\``;
+        let userStatuses = ``;
+        userStatuses += `${client.customEmojis.online} \`${numeral(guild.presences.cache.filter(p => p.status === `online`).size).format('0,0')}\``;
+        userStatuses += `\n${client.customEmojis.offline} \`${numeral(guild.presences.cache.filter(p => p.status === `offline`).size).format('0,0')}\``;
+        userStatuses += `\n${client.customEmojis.idle} \`${numeral(guild.presences.cache.filter(p => p.status === `idle`).size).format('0,0')}\``;
+        userStatuses += `\n${client.customEmojis.dnd} \`${numeral(guild.presences.cache.filter(p => p.status === `dnd`).size).format('0,0')}\``;
         embed = embed.addField(`User Statuses:`, userStatuses, true);
 
-        var channels = ``;
-        channels += `All - \`${numeral(guild.channels.size).format('0,0')}\``;
-        channels += `\nText - \`${numeral(guild.channels.filter(c => c.type === `text`).size).format('0,0')}\``;
-        channels += `\nVoice - \`${numeral(guild.channels.filter(c => c.type === `voice`).size).format('0,0')}\``;
-        channels += `\nCategory - \`${numeral(guild.channels.filter(c => c.type === `category`).size).format('0,0')}\``;
+        let channels = ``;
+        channels += `All - \`${numeral(guild.channels.cache.size).format('0,0')}\``;
+        channels += `\nText - \`${numeral(guild.channels.cache.filter(c => c.type === `text`).size).format('0,0')}\``;
+        channels += `\nVoice - \`${numeral(guild.channels.cache.filter(c => c.type === `voice`).size).format('0,0')}\``;
+        channels += `\nCategory - \`${numeral(guild.channels.cache.filter(c => c.type === `category`).size).format('0,0')}\``;
         embed = embed.addField(`Channels:`, channels, true);
         return message.channel.send({ embed });
     };
