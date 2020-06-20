@@ -42,7 +42,7 @@ class GuildMusicManager {
         const output = ytdl(url, {
             filter: "audioonly",
             opusEncoded: true,
-            encoderArgs: ['-af', 'bass=g=10']
+            encoderArgs: ['-af', 'bass=g=-1']
         });
 
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
@@ -68,6 +68,10 @@ class GuildMusicManager {
         if (dispatcher) {
             dispatcher.setVolumeLogarithmic(newVolume);
         }
+    }
+
+    get upcoming() {
+        return this.queue.slice(0, 10);
     }
 
   }
