@@ -42,7 +42,7 @@ class GuildMusicManager {
         const output = ytdl(url, {
             filter: "audioonly",
             opusEncoded: true,
-            encoderArgs: ['-af']
+            encoderArgs: ['-af', 'bass=g=10']
         });
 
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
