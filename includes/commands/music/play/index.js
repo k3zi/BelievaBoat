@@ -45,6 +45,7 @@ class GuildMusicManager {
             encoderArgs: ['-af']
         });
 
+        console.log(`play -> playing: (${nextSong.videoID}) ${nextSong.title}`);
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         this.connection.play(output, { 
             volume: this.volume,
@@ -58,13 +59,12 @@ class GuildMusicManager {
             .on('finish', () => {
                 self.playNext();
             });
-        this.setVolume(this.volume);
     }
 
     setVolume(newVolume) {
         this.volume = newVolume;
         const dispatcher = this.connection.dispatcher;
-        if (!dispatcher) {
+        if (dispatcher) {
             dispatcher.setVolumeLogarithmic(newVolume);
         }
     }
@@ -78,7 +78,7 @@ module.exports = (async function(client, helpers) {
 
     exports.meta = {};
     exports.meta.name = 'play';
-    exports.meta.description = 'Shows statistics about voice participants';
+    exports.meta.description = 'Queues the first matched song for the search term given.';
     exports.meta.module = 'music';
     exports.meta.examples = ['play Justin Bieber Baby'];
     exports.meta.aliases = [];
@@ -117,8 +117,6 @@ module.exports = (async function(client, helpers) {
         const videoId = videoObject.id.videoId;
         const videoTitle = videoObject.snippet.title;
         
-        console.log(`play -> playing: (${videoId}) ${videoTitle}`);
-        console.log(channel.members.array().map(m => m.user.id));
         let voiceBot;
         let connection;
 
@@ -145,23 +143,6 @@ module.exports = (async function(client, helpers) {
 
         message.channel.send(helpers.generateEmbed(client, message.author, `Queued: ${videoTitle}`,  true));
         await manager.queueSong(videoId, videoTitle, message.author);
-
-        // let queuedTrack = new QueuedTrack({
-        //     channel: {
-        //         id: channel.id,
-        //         name: channel.name
-        //     },
-        //     bot: {
-        //         user: {
-        //             id: voiceBot.user.id,
-        //             username: voiceBot.user.username
-        //         }
-        //     },
-        //     member: {
-        //         id: member.id,
-        //         displayName: member.displayName
-        //     }
-        // });
     };
 
     return exports;
