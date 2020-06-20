@@ -21,15 +21,13 @@ module.exports = (async function(client, helpers) {
         var embed = new Discord.MessageEmbed();
         embed = embed.setTitle(guild.name);
         embed = embed.setImage(guild.iconURL);
-        embed = embed.setColor(client.helpers.colors.info);/*
-        var description =
-        embed = embed.setDescription(description);*/
+        embed = embed.setColor(client.helpers.colors.info);
         embed = embed.addField(`Guild ID:`, guild.id, true);
         embed = embed.addField(`Owner:`, guild.owner, true);
         embed = embed.addField('Created', `${moment(guild.createdAt).format('L')} (${moment(guild.createdAt).fromNow()})`, true);
         embed = embed.addField('# of Bans', `\`${numeral(await guild.fetchBans().size).format('0,0')}\` banned members`, true);
 
-        embed = embed.addBlankField();
+        embed = embed.addField('\u200b', '\u200b');
 
         var users = ``;
         users += `All - \`${numeral(guild.members.size).format('0,0')}\``;
