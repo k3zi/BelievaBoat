@@ -25,6 +25,12 @@ module.exports = async function(client, helpers) {
         }
 
         client.helpers.log(`startup`, `main client: ${client.user.username} is online`);
+        const voice = client.voice;
+        if (voice) {
+            voice.connections.each(c => {
+                c.disconnect();
+            });
+        }
     
         setInterval(async () => {
             const randomName = uniqueNamesGenerator({
