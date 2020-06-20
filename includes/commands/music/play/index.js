@@ -51,21 +51,15 @@ module.exports = (async function(client, helpers) {
             const url = `https://www.youtube.com/watch?v=${videoId}`;
             
             console.log(`play -> playing: (${videoId})`);
-            console.log(client.potentialBots);
-            console.log(channel.members);
             let voiceBot = channel.members.find(m => client.potentialBots.some(b => b.user && b.user.id == m.user.id && b.channels.cache.get(message.member.voice.channelID).connection));
-            console.log(voiceBot);
             let connection;
             if (!voiceBot) {
                 let availableBots = await client.loopUntilBotAvailable(message.guild);
-                console.log(availableBots);
-                
                 voiceBot = availableBots[0];
                 let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
                 connection = await voiceBotChannel.join();
             }
 
-            console.log(voiceBot);
             let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
             connection = voiceBotChannel.connection || (await voiceBotChannel.join());
             connection.play(await ytdl(url), { type: 'opus', volume: 0.5 });
