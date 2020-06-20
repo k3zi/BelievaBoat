@@ -115,7 +115,7 @@ module.exports = (async function(client, helpers) {
         let manager = client.musicManagers.get(message.guild.id);
         if (!manager) {
             manager = new GuildMusicManager(client, message.guild, message.channel, connection);
-            client.musicManagers.set(messaege.guild.id, manager);
+            client.musicManagers.set(message.guild.id, manager);
         }
 
         message.channel.send(helpers.generateEmbed(client, message.author, `Queued: ${videoTitle}`,  true));
