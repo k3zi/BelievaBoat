@@ -163,8 +163,6 @@ module.exports = (async function(bot, helpers) {
     });
 
     bot.on('guildMemberSpeaking', async (member, speaking) => {
-        console.log(`guildMemberSpeaking ⇒ ${member.user.username}: ${speaking ? 'yes' : 'no'}`);
-
         if (speaking) {
             await logUserStartedSpeaking(member.user, member.voice.channel);
         } else {
@@ -236,9 +234,7 @@ module.exports = (async function(bot, helpers) {
             i++;
         };
 
-        await message.channel.send({embed}).then(async sentMessage => {
-            await bot.addDeleteWatchForMessage(exports.meta.name, message, sentMessage);
-        });
+        return message.channel.send({embed});
     };
 
     return exports;

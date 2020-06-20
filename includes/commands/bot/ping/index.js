@@ -26,8 +26,6 @@ module.exports = (async function(client, helpers) {
         var t = process.hrtime();
         let result = await client.db.connection.db.admin().ping();
         let databasePing = process.hrtime(t);
-        console.log('benchmark took %d seconds and %d nanoseconds', t[0], t[1]);
-        console.log(result);
 
         var embed = client.helpers.generatePlainEmbed(client, client.user, '');
         embed = embed.setTitle(`Ping Results:`);

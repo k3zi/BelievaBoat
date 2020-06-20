@@ -22,6 +22,7 @@ client.helpers = helpers;
 client.startTime = new Date();
 client.commands = new Discord.Collection();
 client.privateVoiceChannels = new Discord.Collection();
+client.musicManagers = new Discord.Collection();
 client.customEmojis = {};
 client.potentialBots = config.extraTokens.map((token, i) => {
     const helperBot = new Discord.Client();
