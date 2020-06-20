@@ -76,7 +76,6 @@ module.exports = (async function(bot, helpers) {
         let voiceChannelActivities = await VoiceChannelJoinActivity.find().where('duration').equals(0).exec();
 
         console.log(`voice -> setting the duration of ${voiceChannelActivities.length} join activities`);
-        console.log(voiceChannelActivities.map(a => a.userID).join('\n'));
 
         let zeroDurationUsers = [];
         await Promise.mapSeries(voiceChannelActivities.sort((a, b) => b.startTime - a.startTime), async voiceChannelActivity => {
