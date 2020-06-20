@@ -48,7 +48,8 @@ class GuildMusicManager {
         this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         this.connection.play(output, { 
             volume: this.volume,
-            type: "opus"
+            type: "opus",
+            highWaterMark: 1 << 25
         })
             .on('error', (e) => {
                 console.log(e);

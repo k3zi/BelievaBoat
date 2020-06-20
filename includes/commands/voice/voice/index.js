@@ -164,8 +164,6 @@ module.exports = (async function(bot, helpers) {
     });
 
     bot.on('guildMemberSpeaking', async (member, speaking) => {
-        console.log(`guildMemberSpeaking ⇒ ${member.user.username}: ${speaking ? 'yes' : 'no'}`);
-
         if (speaking) {
             await logUserStartedSpeaking(member.user, member.voice.channel);
         } else {
