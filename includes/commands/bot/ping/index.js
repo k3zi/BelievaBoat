@@ -36,7 +36,7 @@ module.exports = (async function(client, helpers) {
 
         var description = ``;
         description += `${client.customEmojis.loading} Message Round Trip: \`-- ms\``;
-        description += `\n${client.customEmojis.check} Discord Heartbeat: \`${util.format('%i', client.ping)} ms\``;
+        description += `\n${client.customEmojis.check} Discord Heartbeat: \`${util.format('%i', client.ws.ping)} ms\``;
         description += `\n${client.customEmojis.check} Database: \`${heartTimeToMs(databasePing)} ms\``;
         embed = embed.setDescription(description);
 

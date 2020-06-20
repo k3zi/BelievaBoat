@@ -18,11 +18,11 @@ module.exports = (async function(client, helpers) {
     exports.run = async (client, message, arg) => {
         let { dbGuild, guild } = message;
 
-        var embed = new Discord.RichEmbed();
+        var embed = new Discord.MessageEmbed();
         embed = embed.setAuthor(`${guild.name} → All Emojis`, guild.iconURL);
         embed = embed.setColor(client.helpers.colors.info);
-        embed = embed.addField('Non-Animated: ', `${guild.emojis.filterArray(e => !e.animated).join(``)}`);
-        embed = embed.addField('Animated: ', `${guild.emojis.filterArray(e => e.animated).join(``)}`);
+        embed = embed.addField('Non-Animated: ', `${guild.emojis.filter().array(e => !e.animated).join(``)}`);
+        embed = embed.addField('Animated: ', `${guild.emojis.filter().array(e => e.animated).join(``)}`);
         return message.channel.send({ embed });
     };
 

@@ -31,9 +31,9 @@ module.exports = (async function(client, helpers) {
         let deleteWatches = _.uniqBy(allDeleteWatches, l => l.channel.id);
 
         if (deleteWatches.length > 0) {
-            var embed = new Discord.RichEmbed();
+            var embed = new Discord.MessageEmbed();
             embed = embed.setColor(helpers.colors.error);
-            embed = embed.setAuthor(`${helpers.formatPlainUserString(message.author)} deleted a message.`, message.author.displayAvatarURL, message.url);
+            embed = embed.setAuthor(`${helpers.formatPlainUserString(message.author)} deleted a message.`, message.author.displayAvatarURL(), message.url);
             embed = embed.addField('User: ', helpers.formatUserMentionExtraString(message.author), true);
             embed = embed.addField('Channel: ', message.channel, true);
             embed = embed.addField('Content: ', message.content);
@@ -69,13 +69,13 @@ module.exports = (async function(client, helpers) {
 
         await Promise.map(watchInfos, async watchInfo => {
             await watchInfo.remove();
-            let commandfile = client.commands.get(watchInfo.command);
+            const commandfile = client.commands.get(watchInfo.command);
             if (!commandfile) {
                 return;
             }
 
-            let channel = await client.channels.get(watchInfo.sentMessage.channel.id);
-            let sentMessage = await channel.fetchMessage(watchInfo.sentMessage.id);
+            const channel = await client.channels.cache.get(watchInfo.sentMessage.channel.id);
+            const sentMessage = await channel.messages.fetch(watchInfo.sentMessage.id);
             return sentMessage.delete();
         });
     });

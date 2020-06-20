@@ -18,7 +18,7 @@ module.exports = (async function(client, helpers) {
     exports.run = async (client, message, arg) => {
         let { dbGuild, guild } = message;
 
-        var embed = new Discord.RichEmbed();
+        var embed = new Discord.MessageEmbed();
         embed = embed.setTitle(guild.name);
         embed = embed.setImage(guild.iconURL);
         embed = embed.setColor(client.helpers.colors.info);/*

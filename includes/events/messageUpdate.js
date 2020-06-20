@@ -20,9 +20,9 @@ module.exports = (async function(client, helpers) {
         let watches = _.uniqBy(allWatches, l => l.channel.id);
 
         if (watches.length > 0) {
-            var embed = new Discord.RichEmbed();
+            var embed = new Discord.MessageEmbed();
             embed.setColor(helpers.colors.error);
-            embed.setAuthor(`${helpers.formatPlainUserString(message.author)} edited a message.`, message.author.displayAvatarURL, message.url);
+            embed.setAuthor(`${helpers.formatPlainUserString(message.author)} edited a message.`, message.author.displayAvatarURL(), message.url);
             embed.addField('User: ', helpers.formatUserMentionExtraString(message.author), true);
             embed.addField('Channel: ', message.channel, true);
             embed.addField('Old Content: ', oldMessage.content);

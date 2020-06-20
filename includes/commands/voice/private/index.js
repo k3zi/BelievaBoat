@@ -15,9 +15,9 @@ module.exports = (async function(bot, helpers) {
     exports.meta.examples = ['private リーディングサークル', 'private 8 Poitical Debate'];
     exports.meta.aliases = [];
 
-    bot.on('voiceStateUpdate', async(oldMember, newMember) => {
-        let newUserChannel = newMember.voiceChannel;
-        let voiceChannel = oldMember.voiceChannel;
+    bot.on('voiceStateUpdate', async(oldState, newState) => {
+        let newUserChannel = newState.channel;
+        let voiceChannel = oldState.channel;
         if (voiceChannel && bot.privateVoiceChannels.get(voiceChannel.id) && voiceChannel.members.size == 0) {
             await voiceChannel.delete();
         }
@@ -41,7 +41,7 @@ module.exports = (async function(bot, helpers) {
             count = -1;
         }
 
-        const user = message.guild.members.find("id", message.author.id);
+        const user = message.guild.members.find(m => m.id === message.author.id);
         const channel = await message.guild.createChannel((name && name.length) ? name : 'Private', 'voice', [{
             id: message.guild.id,
             deny: count === -1 ? ['CONNECT'] : [],

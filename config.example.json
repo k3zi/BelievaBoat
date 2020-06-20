@@ -1,5 +1,6 @@
 {
     "defaultPrefix": ".",
     "token": "PLACE_MAIN_TOKEN_HERE",
-    "extraTokens": []
+    "extraTokens": [],
+    "youTubeDataAPIKey": ""
 }

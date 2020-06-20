@@ -21,7 +21,7 @@ module.exports = (async function(client, helpers) {
     exports.run = async (client, message, arg) => {
         var member = message.member;
         if (arg.length != 0) {
-            member = message.guild.members.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
+            member = message.guild.members.cache.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
         }
 
         client.helpers.log(`command`, `displaying profile: ${member}`);
@@ -47,15 +47,15 @@ module.exports = (async function(client, helpers) {
             }
         ]);
 
-        var embed = new Discord.RichEmbed();
-        embed = embed.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL);
-        embed = embed.setDescription(`${emojis[member.user.presence.status]} ${member}`);
-        embed = embed.setColor([0, 0, 0]);
-        embed = embed.addField('User ID', member.user.id, false);
-        embed = embed.addField('Joined Discord', `${moment(member.user.createdAt).format('LLLL')} (${moment(member.user.createdAt).fromNow()})`, true);
-        embed = embed.addField('Joined Server', `${moment(member.joinedAt).format('LLLL')} (${moment(member.joinedAt).fromNow()})`, true);
-        embed = embed.addField('Highest Role', member.highestRole, false);
-        embed = embed.setThumbnail(member.user.displayAvatarURL);
+        let embed = new Discord.MessageEmbed();
+        embed = embed.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+            .setDescription(`${emojis[member.user.presence.status]} ${member}`)
+            .setColor(helpers.colors.info)
+            .addField('User ID', member.user.id, false)
+            .addField('Joined Discord', `${moment(member.user.createdAt).format('LLLL')} (${moment(member.user.createdAt).fromNow()})`, true)
+            .addField('Joined Server', `${moment(member.joinedAt).format('LLLL')} (${moment(member.joinedAt).fromNow()})`, true)
+            .addField('Highest Role', member.highestRole, false)
+            .setThumbnail(member.user.displayAvatarURL());
 
         let sentMessage = await message.channel.send({
             embed

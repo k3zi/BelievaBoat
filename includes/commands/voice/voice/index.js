@@ -45,7 +45,7 @@ module.exports = (async function(bot, helpers) {
 
     async function logUserStartedSpeaking(user, channel) {
         let voiceChannelActivity = new VoiceChannelSpeakActivity({
-            userId: user.id,
+            userID: user.id,
             channelID: channel.id
         });
         await voiceChannelActivity.save();
@@ -70,8 +70,8 @@ module.exports = (async function(bot, helpers) {
     }
 
     bot.on('ready', async () => {
-        let voiceChannels = bot.channels.array().filter(c => c.type === 'voice');
-        let guilds = _.uniqBy(voiceChannels.map(vc =>vc.guild), 'id');
+        let voiceChannels = bot.channels.cache.array().filter(c => c.type === 'voice');
+        let guilds = _.uniqBy(voiceChannels.map(vc => vc.guild), 'id');
 
         let voiceChannelActivities = await VoiceChannelJoinActivity.find().where('duration').equals(0).exec();
 
@@ -92,14 +92,14 @@ module.exports = (async function(bot, helpers) {
                 return;
             }
 
-            let vcRole = guild.roles.filter(r => r.name.includes('In Voice')).first();
+            let vcRole = guild.roles.cache.filter(r => r.name.includes('In Voice')).first();
             if (!vcRole) {
                 return;
             }
 
             return Promise.map(vcRole.members.array(), async member => {
                 if (!member.voiceChannel || member.voiceChannel.parent.name.toLowerCase().includes('staff')) {
-                    return member.removeRole(vcRole);
+                    return member.roles.remove(vcRole);
                 }
             });
         });
@@ -109,75 +109,73 @@ module.exports = (async function(bot, helpers) {
                 return;
             }
 
-            let vcRole = vc.guild.roles.filter(r => r.name.includes('In Voice')).first();
+            let vcRole = vc.guild.roles.cache.filter(r => r.name.includes('In Voice')).first();
 
             if (!vcRole) {
                 return;
             }
 
             await Promise.map(vc.members.array(), async member => {
-                if (!member.roles.get(vcRole.id)) {
-                    await member.addRole(vcRole);
+                if (!member.roles.cache.get(vcRole.id)) {
+                    await member.roles.add(vcRole);
                 }
 
-                await logUserEnteredVoice(member.user, member.voiceChannel, true);
+                await logUserEnteredVoice(member.user, member.voice.channel, true);
             });
         });
     });
 
-    bot.on('voiceStateUpdate', async (oldMember, newMember) => {
-        let vcRole = (oldMember.guild || newMember.guild).roles.filter(r => r.name.includes('In Voice')).first();
+    bot.on('voiceStateUpdate', async (oldState, newState) => {
+        const vcRole = (oldState.guild || newState.guild).roles.cache.filter(r => r.name.includes('In Voice')).first();
         if (!vcRole) {
             return;
         }
 
-        let newVoiceChannel = newMember.voiceChannel;
-        let oldVoiceChannel = oldMember.voiceChannel;
+        let newVoiceChannel = newState.channel;
+        let oldVoiceChannel = oldState.channel;
+        const member = newState.member;
+        const user = member.user;
 
-        var didLog = false;
+        let didLog = false;
 
-        if (!newMember.roles.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-            await newMember.addRole(vcRole);
-            await logUserEnteredVoice(newMember.user, newVoiceChannel);
+        if (!member.roles.cache.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
+            await member.roles.add(vcRole);
+            await logUserEnteredVoice(user, newVoiceChannel);
             didLog = true;
-        } else if (newMember.roles.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
-            await newMember.removeRole(vcRole);
+        } else if (member.roles.cache.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
+            await member.roles.remove(vcRole);
 
             if (oldVoiceChannel && !oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserExitedVoice(newMember.user, oldVoiceChannel);
+                await logUserExitedVoice(user, oldVoiceChannel);
             }
         }
 
         if (oldVoiceChannel && newVoiceChannel && oldVoiceChannel.id != newVoiceChannel.id) {
             if (!oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserExitedVoice(newMember.user, oldVoiceChannel);
+                await logUserExitedVoice(user, oldVoiceChannel);
             }
 
             if (!didLog && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserEnteredVoice(newMember.user, newVoiceChannel);
+                await logUserEnteredVoice(user, newVoiceChannel);
                 didLog = true;
             }
         }
     });
 
     bot.on('guildMemberSpeaking', async (member, speaking) => {
-        if (member.voiceChannel.parent.name.toLowerCase().includes('staff')) {
-            return;
-        }
-
         console.log(`guildMemberSpeaking ⇒ ${member.user.username}: ${speaking ? 'yes' : 'no'}`);
 
         if (speaking) {
-            await logUserStartedSpeaking(member.user, member.voiceChannel);
+            await logUserStartedSpeaking(member.user, member.voice.channel);
         } else {
-            await logUserStoppedSpeaking(member.user, member.voiceChannel);
+            await logUserStoppedSpeaking(member.user, member.voice.channel);
         }
     });
 
     exports.run = async (bot, message, arg) => {
         var member = message.member;
         if (arg.length != 0) {
-            member = message.guild.members.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
+            member = message.guild.members.cache.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
         }
 
         if (!member) {
@@ -200,9 +198,7 @@ module.exports = (async function(bot, helpers) {
                             if: {
                                 $eq: ['$duration', 0]
                             },
-                            then: {
-                                $subtract: [new Date(), "$start"]
-                            },
+                            then: '$duration',
                             else: '$duration'
                         }
                     }
@@ -222,16 +218,16 @@ module.exports = (async function(bot, helpers) {
             return b.totalDuration - a.totalDuration;
         });
 
-        var embed = new Discord.RichEmbed();
+        var embed = new Discord.MessageEmbed();
         embed = embed.setTitle("Voice Statistics:");
-        embed = embed.setColor([0, 0, 0]);
+        embed = embed.setColor(helpers.colors.info);
         embed = embed.setTimestamp();
 
         var i = 0;
         var j = 0;
         while (i < sortedAggrSet.length && j < 18) {
             let ele = sortedAggrSet[i];
-            let eleUser = message.guild.members.get(ele._id);
+            let eleUser = message.guild.members.cache.get(ele._id);
             if (eleUser) {
                 let hours = Math.round((ele.totalDuration / 1000 / 60 / 60) * 1000) / 1000;
                 embed = embed.addField(`${i + 1}) ${eleUser.displayName}`, `${hours} hours`, true);

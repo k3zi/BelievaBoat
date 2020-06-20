@@ -33,7 +33,7 @@ client.potentialBots = config.extraTokens.map((token, i) => {
 });
 
 client.loopUntilBotAvailable = async function(guild) {
-    let availableBots = client.potentialBots.filter(b => b.guilds.has(guild.id) && !b.voiceConnections.has(guild.id));
+    let availableBots = client.potentialBots.filter(b => b.guilds.cache.has(guild.id) && !b.voice.connections.map(c => c.channel.guild.id).includes(guild.id));
     console.log(`Available Bots: `, availableBots.map(b => b.user.username));
     if (!availableBots.length) {
         console.log(`Waiting 0.5 seconds for VC client.`);

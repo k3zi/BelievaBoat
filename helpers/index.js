@@ -62,7 +62,7 @@ helpers.mumberToOrdinal = function (n) {
 }
 
 helpers.addSenderToFooter = function (embed, message, filler) {
-    return embed.setFooter(`${message.author.username}#${message.author.discriminator} ${filler} in #${message.channel.name}`, message.author.displayAvatarURL);
+    return embed.setFooter(`${message.author.username}#${message.author.discriminator} ${filler} in #${message.channel.name}`, message.author.displayAvatarURL());
 }
 
 helpers.formatPlainUserString = function (user) {
@@ -74,9 +74,9 @@ helpers.formatUserMentionExtraString = function (user) {
 }
 
 helpers.generateErrorEmbed = function (client, user, error) {
-    var embed = new Discord.RichEmbed();
+    let embed = new Discord.MessageEmbed();
     if (user) {
-        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL());
     }
     if (error) {
         embed = embed.setDescription(`${client.customEmojis.xmark} ${error}`);
@@ -86,9 +86,9 @@ helpers.generateErrorEmbed = function (client, user, error) {
 };
 
 helpers.generateSuccessEmbed = function (client, user, message) {
-    var embed = new Discord.RichEmbed();
+    var embed = new Discord.MessageEmbed();
     if (user) {
-        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL());
     }
     embed = embed.setDescription(`${client.customEmojis.check} ${message}`);
     embed = embed.setColor(helpers.colors.success);
@@ -96,9 +96,9 @@ helpers.generateSuccessEmbed = function (client, user, message) {
 };
 
 helpers.generatePlainEmbed = function (client, user, message) {
-    var embed = new Discord.RichEmbed();
+    var embed = new Discord.MessageEmbed();
     if (user) {
-        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL);
+        embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL());
     }
     embed = embed.setDescription(message);
     embed = embed.setColor(helpers.colors.info);
@@ -116,14 +116,14 @@ helpers.generateEmbed = function (client, user, message, success) {
 helpers.findUser = async function (guild, value) {
     value = value + '';
     if (guild.members.has(value)) {
-        return guild.members.get(value).user;
+        return guild.members.cache.get(value).user;
     }
 
     var match;
     if (match = value.match(/<@[!]?([0-9]+)>/)) {
         let userID = match[1];
         if (guild.members.has(userID)) {
-            return guild.members.get(userID).user;
+            return guild.members.cache.get(userID).user;
         }
 
         let user = await guild.client.fetch(userID);
@@ -406,6 +406,10 @@ helpers.parseActionForIn = async function (client, guild, arg) {
     await helpers.parseArgs(client, guild, args, forArg, inArg);
 
     return { action, value, forArg, inArg };
-}
+};
+
+helpers.prefix = function (dbGuild, client) {
+    return (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
+};
 
 module.exports = helpers;
