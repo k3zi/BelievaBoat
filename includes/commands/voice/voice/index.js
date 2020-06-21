@@ -171,7 +171,7 @@ module.exports = (async function(bot, helpers) {
     });
 
     exports.run = async (bot, message, arg) => {
-        var member = message.member;
+        const member = message.member;
         if (arg.length != 0) {
             member = message.guild.members.cache.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
         }
@@ -180,10 +180,8 @@ module.exports = (async function(bot, helpers) {
             return;
         }
 
-        const infoForDeletion = {
-            command: exports.meta.name,
-            channelID: message.channel.id
-        };
+        let voiceChannelActivities = await VoiceChannelJoinActivity.find().exec();
+        console.log(voiceChannelActivities);
 
         const aggrSet = await VoiceChannelJoinActivity.aggregate([
             {
@@ -216,13 +214,13 @@ module.exports = (async function(bot, helpers) {
             return b.totalDuration - a.totalDuration;
         });
 
-        var embed = new Discord.MessageEmbed();
+        let embed = new Discord.MessageEmbed();
         embed = embed.setTitle("Voice Statistics:");
         embed = embed.setColor(helpers.colors.info);
         embed = embed.setTimestamp();
 
-        var i = 0;
-        var j = 0;
+        let i = 0;
+        let j = 0;
         while (i < sortedAggrSet.length && j < 18) {
             let ele = sortedAggrSet[i];
             let eleUser = message.guild.members.cache.get(ele._id);
