@@ -1,7 +1,7 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
 const YouTube = require('youtube-node');
-const GuildMusicManager = require('./guildMusicManager');
+const GuildMusicManager = require('./../guildMusicManager');
 
 module.exports = (async function(client, helpers) {
     let exports = {};
