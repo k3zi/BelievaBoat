@@ -3,7 +3,7 @@ const _ = require('lodash');
 const YouTube = require('youtube-node');
 const GuildMusicManager = require('./../guildMusicManager');
 
-module.exports = (async function(client, helpers) {
+module.exports = async (client, helpers) => {
     let exports = {};
 
     exports.meta = {};
@@ -17,8 +17,8 @@ module.exports = (async function(client, helpers) {
         const youTube = new YouTube();
         youTube.setKey(client.config.youTubeDataAPIKey);
         console.log(`play -> searching for: ${term}`);
-        return new Promise(function(resolve, reject) {
-            youTube.search(term, 1, function(error, result) {
+        return new Promise((resolve, reject) => {
+            youTube.search(term, 1, (error, result) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -80,4 +80,4 @@ module.exports = (async function(client, helpers) {
     };
 
     return exports;
-});
+};

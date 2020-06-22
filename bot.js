@@ -33,6 +33,10 @@ client.potentialBots = config.extraTokens.map((token, i) => {
     return helperBot;
 });
 
+client.addReminder = function(remminder) {
+    
+};
+
 client.loopUntilBotAvailable = async function(guild) {
     let availableBots = client.potentialBots.filter(b => b.guilds.cache.has(guild.id) && !b.voice.connections.map(c => c.channel.guild.id).includes(guild.id));
     console.log(`Available Bots: `, availableBots.map(b => b.user.username));
