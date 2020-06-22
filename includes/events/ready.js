@@ -5,7 +5,6 @@ const { uniqueNamesGenerator, adjectives, colors, animals, countries, names, sta
 module.exports = async function(client, helpers) {
     const exports = {};
 
-    const db = client.db;
     const emojis = {
         online: `476143357853302796`,
         offline: `478260206602813444`,
@@ -25,6 +24,12 @@ module.exports = async function(client, helpers) {
         }
 
         client.helpers.log(`startup`, `main client: ${client.user.username} is online`);
+        client.guilds.cache.each(g => {
+            const voice = g.me.voice;
+            if (voice) {
+                voice.setChannel(null);
+            }
+        });
     
         setInterval(async () => {
             const randomName = uniqueNamesGenerator({

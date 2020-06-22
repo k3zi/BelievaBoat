@@ -12,6 +12,7 @@ class GuildMusicManager {
         this.guild = guild;
         this.channel = channel;
         this.connection = connection;
+        this.monitorInactivity = null;
         this.volume = 0.5;
         this.isPlaying = false;
         this.queue = [];
@@ -30,13 +31,23 @@ class GuildMusicManager {
     }
 
     async playNext() {
+        const self = this;
+
+        // Stop playing if there are no more songs left.
         if (this.queue.length === 0) {
             this.isPlaying = false;
+            this.monitorInactivity = setTimeout(() => {
+                this.connection.disconnect();
+            }, 60 * 1000);
             return;
+        }
+
+        // Remove the timer for inactivity since we are still playing.
+        if (this.monitorInactivity) {
+            clearTimeout(this.monitorInactivity);
         }
         this.isPlaying = true;
 
-        const self = this;
         const nextSong = this.queue.shift();
         const url = `https://www.youtube.com/watch?v=${nextSong.videoID}`;
         const output = ytdl(url, {
@@ -59,7 +70,6 @@ class GuildMusicManager {
                 console.log('finished playing song');
                 self.playNext();
             });
-        this.setVolume(this.volume);
     }
 
     setVolume(newVolume) {

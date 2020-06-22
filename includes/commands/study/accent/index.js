@@ -57,7 +57,7 @@ module.exports = (async function(client, helpers) {
 
     exports.meta = {};
     exports.meta.name = `accent`;
-    exports.meta.aliases = ['pitch', 'p'];
+    exports.meta.aliases = [];
     exports.meta.description = `Looks up the pitch accent for the specified word via NHK 日本語発音アクセント新辞典（２０１６）.`;
     exports.meta.module = 'study';
     exports.meta.examples = ['accent こんにちは'];
