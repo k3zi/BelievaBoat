@@ -1,95 +1,10 @@
-const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require('lodash');
 const YouTube = require('youtube-node');
-const ytdl = require("discord-ytdl-core");
-
-class GuildMusicManager {
-
-    constructor(client, helpers, guild, channel, connection) {
-        this.client = client;
-        this.helpers = helpers;
-        this.guild = guild;
-        this.channel = channel;
-        this.connection = connection;
-        this.monitorInactivity = null;
-        this.volume = 0.5;
-        this.isPlaying = false;
-        this.queue = [];
-    }
-
-    async queueSong(videoID, title, user) {
-        this.queue.push({
-            videoID,
-            title,
-            user
-        });
-        
-        if (!this.isPlaying) {
-            await this.playNext();
-        }
-    }
-
-    async playNext() {
-        const self = this;
-
-        // Stop playing if there are no more songs left.
-        if (this.queue.length === 0) {
-            this.isPlaying = false;
-            this.monitorInactivity = setTimeout(() => {
-                this.connection.disconnect();
-            }, 60 * 1000);
-            return;
-        }
-
-        // Remove the timer for inactivity since we are still playing.
-        if (this.monitorInactivity) {
-            clearTimeout(this.monitorInactivity);
-        }
-        this.isPlaying = true;
-
-        const nextSong = this.queue.shift();
-        const url = `https://www.youtube.com/watch?v=${nextSong.videoID}`;
-        const output = ytdl(url, {
-            filter: "audioonly",
-            opusEncoded: true,
-            encoderArgs: ['-af', 'bass=g=-1']
-        });
-
-        this.channel.send(this.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
-        this.connection.play(output, { 
-            volume: this.volume,
-            type: "opus",
-            highWaterMark: 1 << 25
-        })
-            .on('error', (e) => {
-                console.log(e);
-                self.playNext();
-            })
-            .on('finish', () => {
-                console.log('finished playing song');
-                self.playNext();
-            });
-    }
-
-    setVolume(newVolume) {
-        this.volume = newVolume;
-        const dispatcher = this.connection.dispatcher;
-        if (dispatcher) {
-            dispatcher.setVolumeLogarithmic(newVolume);
-        }
-    }
-
-    get upcoming() {
-        return this.queue.slice(0, 10);
-    }
-
-  }
+const GuildMusicManager = require('./guildMusicManager');
 
 module.exports = (async function(client, helpers) {
     let exports = {};
-
-    const db = client.db;
 
     exports.meta = {};
     exports.meta.name = 'play';
@@ -131,6 +46,7 @@ module.exports = (async function(client, helpers) {
         }
         const videoId = videoObject.id.videoId;
         const videoTitle = videoObject.snippet.title;
+        const guild = message.guild;
         
         let voiceBot;
         let connection;
@@ -141,7 +57,7 @@ module.exports = (async function(client, helpers) {
         }
         
         if (!voiceBot) {
-            let availableBots = await client.loopUntilBotAvailable(message.guild);
+            let availableBots = await client.loopUntilBotAvailable(guild);
             voiceBot = availableBots[0];
             let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
             connection = await voiceBotChannel.join();
@@ -150,10 +66,13 @@ module.exports = (async function(client, helpers) {
         let voiceBotChannel = voiceBot.channels.cache.get(message.member.voice.channelID);
         connection = voiceBotChannel.connection || (await voiceBotChannel.join());
 
-        let manager = client.musicManagers.get(message.guild.id);
+        let manager = client.musicManagers.get(guild.id);
         if (!manager) {
-            manager = new GuildMusicManager(client, helpers, message.guild, message.channel, connection);
-            client.musicManagers.set(message.guild.id, manager);
+            manager = new GuildMusicManager(client, guild, message.channel, connection);
+            client.musicManagers.set(guild.id, manager);
+            connection.on('disconnect', () => {
+                client.musicManagers.delete(guild.id);
+            });
         }
 
         message.channel.send(helpers.generateEmbed(client, message.author, `Queued: ${videoTitle}`,  true));
