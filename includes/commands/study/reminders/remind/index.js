@@ -122,7 +122,7 @@ module.exports = async (client) => {
         const interval = client.intervalReminderMapping[id];
         if (interval) {
             clearInterval(interval);
-            delete intervalReminderMapping[id];
+            delete client.intervalReminderMapping[id];
         }
 
         const timeout = client.timeoutReminderMapping[id];
