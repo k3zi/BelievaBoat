@@ -15,7 +15,7 @@ module.exports = async (client) => {
 
     exports.run = async (client, message, arg) => {
         const reminders = await Reminder.find()
-            .where('userID').equals(message.author.id)
+            .where('authorID').equals(message.author.id)
             .exec();
         await Promise.all(reminders.map(async (r) => {
             await client.removeReminder(client, r);

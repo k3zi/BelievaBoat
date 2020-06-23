@@ -1,6 +1,9 @@
 const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require(`lodash`);
+const shortid = require('shortid');
+
+shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 
 module.exports = (async function(client, helpers) {
     const exports = {};
@@ -40,6 +43,11 @@ module.exports = (async function(client, helpers) {
     }));
 
     db.model(`Reminder`, new Schema({
+        _id: {
+            type: String,
+            default: shortid.generate
+        },
+        authorID: { type: String, required: true },
         channelID: { type: String, required: true },
         guildID: { type: String, required: true },
         message: { type: String, required: true },

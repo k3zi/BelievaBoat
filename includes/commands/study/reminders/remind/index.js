@@ -1,20 +1,8 @@
 const Discord = require('discord.js');
 const _ = require('lodash');
 
-const ReminderType = Object.freeze({
-    once: 1,
-    recurring: 2
-});
-
-const WhenType = Object.freeze({
-    online: 1,
-    offline: 2,
-    dnd: 3,
-    idle: 4,
-    busy: 3,
-    isValid: (x) => [1, 2, 3, 4].includes(x),
-    toStatus: (x) => ['invalid', 'online', 'offline', 'dnd', 'idle', 'busy'][x]
-});
+const ReminderType = require('./../reminderType');
+const WhenType = require('./../whenType');
 
 function parseTime(s) {
     const unitMapping = {
@@ -180,7 +168,8 @@ module.exports = async (client) => {
             channelID: message.channel.id,
             guildID: message.guild.id,
             message: reminderInfo.message,
-            userID: message.author.id,
+            authorID: message.author.id,
+            userID: reminderInfo.user.id,
             type: reminderInfo.type,
             when: reminderInfo.when,
             seconds: reminderInfo.seconds
