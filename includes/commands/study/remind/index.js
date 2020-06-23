@@ -80,7 +80,7 @@ async function parseArgs(message, arg) {
     result.seconds = seconds;
     token = args.shift();
 
-    if (token === 'when' && ['online', 'offline', 'dnd', 'idle'].includes(args.peek())) {
+    if (token === 'when' && ['online', 'offline', 'dnd', 'idle'].includes(args[0])) {
         if (result.type !== ReminderType.recurring) {
             throw new Error('`when` may only be used for recurring events.')
         }
@@ -137,7 +137,7 @@ module.exports = async (client) => {
         if (WhenType.isValid(reminder.when) && user.presence.status !== WhenType.toStatus(reminder.when)) {
             return;
         }
-        
+
         const now = new Date();
         if (reminder.type === ReminderType.once) {
             const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds * 1000);
