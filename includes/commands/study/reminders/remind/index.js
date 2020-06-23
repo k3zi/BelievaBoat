@@ -223,8 +223,8 @@ module.exports = async (client) => {
         client.helpers.log('reminders', `${user.username} status changed from: ${oldPresence.status} to ${newPresence.status}; adjusting ${reminders.length} reminders`);
         
         const validReminders = reminders.filter(r => WhenType.isValid(r.when));
-        const inActiveReminders = validReminders.filter(r => WhenType.toStatus(r.when) !== newPresence.status && intervalReminderMapping[r.id]);
-        const activeReminders = validReminders.filter(r => WhenType.toStatus(r.when) === newPresence.status && !intervalReminderMapping[r.id]);
+        const inActiveReminders = validReminders.filter(r => WhenType.toStatus(r.when) !== newPresence.status && client.intervalReminderMapping[r.id]);
+        const activeReminders = validReminders.filter(r => WhenType.toStatus(r.when) === newPresence.status && !client.intervalReminderMapping[r.id]);
         await Promise.all(inActiveReminders.map((r) => removeReminder(client, r)));
         await Promise.all(activeReminders.map((r) => addReminder(client, r)));
     });
