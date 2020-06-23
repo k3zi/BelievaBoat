@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const _ = require('lodash');
 
 const ReminderType = Object.freeze({
@@ -9,7 +10,9 @@ const WhenType = Object.freeze({
     online: 1,
     offline: 2,
     dnd: 3,
-    idle: 4
+    idle: 4,
+    isValid: (x) => [1, 2, 3, 4].includes(x),
+    toStatus: (x) => ['invalid', 'online', 'offline', 'dnd', 'idle'][x]
 });
 
 function parseTime(s) {
@@ -101,15 +104,37 @@ module.exports = async (client) => {
     exports.meta.aliases = [];
 
     const Reminder = client.db.model('Reminder');
+    const userStatusChanges = new Discord.Collection();
+    const intervalReminderMapping = {};
+    const timeoutReminderMapping = {};
 
     async function fireReminder(client, reminder) {
         const channel = client.channels.cache.get(reminder.channelID);
         const user = await client.users.fetch(reminder.userID);
-        const embed = client.helpers.generateSuccessEmbed(client, user, `Reminder: ${reminder.message}`);
+        const embed = new Discord.MessageEmbed()
+            .setDescription(`${client.customEmojis.check} Reminder: ${reminder.message}`)
+       　   .setColor(client.helpers.colors.info);
         await channel.send(user, embed);
     }
 
+    async function removeReminder(client, reminder) {
+        const id = reminder.id;
+        const interval = intervalReminderMapping[id];
+        if (interval) {
+            clearInterval(interval);
+            delete intervalReminderMapping[id];
+        }
+
+        const timeout = timeoutReminderMapping[id];
+        if (timeout) {
+            clearTimeout(timeout);
+            delete timeoutReminderMapping[id];
+        }
+    }
+
     async function addReminder(client, reminder) {
+        const user = await client.users.fetch(reminder.userID);
+        if (!userStatusChanges.has())
         const now = new Date();
         if (reminder.type === ReminderType.once) {
             const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds * 1000);
@@ -118,23 +143,31 @@ module.exports = async (client) => {
                 await fireReminder(client, reminder);
                 return await reminder.remove();
             }
-            setTimeout(async () => {
+            const timeout = setTimeout(async () => {
                 await fireReminder(client, reminder);
                 await reminder.remove();
             }, timeot);
+            timeoutReminderMapping[reminder.id] = timeout;
         } else if (reminder.type === ReminderType.recurring) {
             let fireDate = reminder.createdAt;
-            let nextFireDate = fireDate;
-            while (nextFireDate < now) {
-                fireDate = nextFireDate;
-                nextFireDate = new Date(nextFireDate.getTime() + reminder.seconds * 1000);
+            if (WhenType.isValid(reminder.when)) {
+                fireDate = new Date();
+            } else {
+                let nextFireDate = fireDate;
+                while (nextFireDate < now) {
+                    fireDate = nextFireDate;
+                    nextFireDate = new Date(nextFireDate.getTime() + reminder.seconds * 1000);
+                }
             }
+
             const delayToFireDate = Math.min(0, Math.max(0, now - fireDate));
-            setTimeout(() => {
-                setInterval(async () => {
+            const timeout = setTimeout(() => {
+                const interval = setInterval(async () => {
                     await fireReminder(client, reminder);
                 }, reminder.seconds * 1000);
+                intervalReminderMapping[reminder.id] = interval;
             }, delayToFireDate);
+            timeoutReminderMapping[reminder.id] = timeout;
         }
     }
 
@@ -162,6 +195,32 @@ module.exports = async (client) => {
         const reminders = await Reminder.find().exec();
         client.helpers.log('reminder', `scheduling ${reminders.length} reminders`);
         await Promise.all(reminders.map((r) => addReminder(client, r)));
+    });
+
+    client.on('presenceUpdate', async (oldPresence, newPresence) => {
+        if (!oldPresence) {
+            return;
+        }
+
+        if (newPresence.status === oldPresence.status) {
+            return;
+        }
+
+        const user = newPresence.user;
+        const reminders = await Reminder.find()
+            .where('userID').equals(user.id)
+            .exec();
+        if (reminders.length === 0) {
+            return;
+        }
+
+        client.helpers.log('reminders', `${user.username} status changed from: ${oldPresence.status} to ${newPresence.status}; adjusting ${reminders.length} reminders`);
+        
+        const validReminders = reminders.filter(r => WhenType.isValid(r.when));
+        const inActiveReminders = validReminders.filter(r => WhenType.toStatus(r.when) !== newPresence.status && intervalReminderMapping[r.id]);
+        const activeReminders = validReminders.filter(r => WhenType.toStatus(r.when) === newPresence.status && !intervalReminderMapping[r.id]);
+        await Promise.all(inActiveReminders.map((r) => removeReminder(client, r)));
+        await Promise.all(activeReminders.map((r) => addReminder(client, r)));
     });
 
     return exports;

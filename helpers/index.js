@@ -86,7 +86,7 @@ helpers.generateErrorEmbed = function (client, user, error) {
 };
 
 helpers.generateSuccessEmbed = function (client, user, message) {
-    var embed = new Discord.MessageEmbed();
+    let embed = new Discord.MessageEmbed();
     if (user) {
         embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL());
     }
@@ -96,7 +96,7 @@ helpers.generateSuccessEmbed = function (client, user, message) {
 };
 
 helpers.generatePlainEmbed = function (client, user, message) {
-    var embed = new Discord.MessageEmbed();
+    let embed = new Discord.MessageEmbed();
     if (user) {
         embed = embed.setAuthor(`${user.username}#${user.discriminator}`, user.displayAvatarURL());
     }
