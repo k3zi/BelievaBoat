@@ -2,8 +2,7 @@ const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require(`lodash`);
 
-const { customAlphabet } = require('nanoid');
-const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 5)
+const { nanoid } = require('nanoid');
 
 module.exports = (async function(client, helpers) {
     const exports = {};
@@ -45,7 +44,7 @@ module.exports = (async function(client, helpers) {
     db.model(`Reminder`, new Schema({
         _id: {
             type: String,
-            default: () => nanoid()
+            default: () => nanoid(5)
         },
         authorID: { type: String, required: true },
         channelID: { type: String, required: true },
