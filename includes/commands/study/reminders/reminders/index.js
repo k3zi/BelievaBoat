@@ -47,7 +47,7 @@ module.exports = async (client) => {
                 } else {
                     info = 'invalid';
                 }
-                descriptions.push(`${reminder.id} ${info}`);
+                descriptions.push(`\`${reminder.id}\` ${info}: ${reminder.message}`);
             }
         }
         embed = embed.setDescription(descriptions.join('\n'));
