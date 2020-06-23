@@ -22,7 +22,7 @@ module.exports = (async function(client, helpers) {
     }));
 
     db.model(`MessageDeleteWatch`, new Schema({
-        command: { type: Number, required: true },
+        command: { type: String, required: true },
         message: { type: Schema.Types.Mixed, required: true },
         sentMessage: { type: Schema.Types.Mixed, required: true },
         shard: Number,
@@ -44,8 +44,9 @@ module.exports = (async function(client, helpers) {
         guildID: { type: String, required: true },
         message: { type: String, required: true },
         userID: { type: String, required: true },
+        seconds: { type: Number, required: false },
         type: { type: Number, required: true },
-        when: { type: Number, required: true },
+        when: { type: Number, required: false }
     }, {
         timestamps: true
      }));

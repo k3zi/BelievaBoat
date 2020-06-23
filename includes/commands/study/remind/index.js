@@ -136,7 +136,7 @@ module.exports = async (client) => {
 
     exports.run = async (client, message, arg) => {
         const reminderInfo = parseArgs(message, arg);
-
+        console.log(reminderInfo);
         let remminder = new Reminder({
             channelID: message.channel.id,
             guildID: message.guild.id,
