@@ -105,9 +105,8 @@ module.exports = async (client) => {
     exports.meta.aliases = [];
 
     const Reminder = client.db.model('Reminder');
-    const userStatusChanges = new Discord.Collection();
-    const intervalReminderMapping = {};
-    const timeoutReminderMapping = {};
+    client.intervalReminderMapping = {};
+    client.timeoutReminderMapping = {};
 
     async function fireReminder(client, reminder) {
         const channel = client.channels.cache.get(reminder.channelID);
@@ -120,16 +119,16 @@ module.exports = async (client) => {
 
     async function removeReminder(client, reminder) {
         const id = reminder.id;
-        const interval = intervalReminderMapping[id];
+        const interval = client.intervalReminderMapping[id];
         if (interval) {
             clearInterval(interval);
             delete intervalReminderMapping[id];
         }
 
-        const timeout = timeoutReminderMapping[id];
+        const timeout = client.timeoutReminderMapping[id];
         if (timeout) {
             clearTimeout(timeout);
-            delete timeoutReminderMapping[id];
+            delete client.timeoutReminderMapping[id];
         }
     }
 
@@ -151,7 +150,7 @@ module.exports = async (client) => {
                 await fireReminder(client, reminder);
                 await reminder.remove();
             }, timeot);
-            timeoutReminderMapping[reminder.id] = timeout;
+            client.timeoutReminderMapping[reminder.id] = timeout;
         } else if (reminder.type === ReminderType.recurring) {
             let fireDate = reminder.createdAt;
             if (WhenType.isValid(reminder.when)) {
@@ -169,11 +168,14 @@ module.exports = async (client) => {
                 const interval = setInterval(async () => {
                     await fireReminder(client, reminder);
                 }, reminder.seconds * 1000);
-                intervalReminderMapping[reminder.id] = interval;
+                client.intervalReminderMapping[reminder.id] = interval;
             }, delayToFireDate);
-            timeoutReminderMapping[reminder.id] = timeout;
+            client.timeoutReminderMapping[reminder.id] = timeout;
         }
     }
+
+    client.addReminder = addReminder;
+    client.removeReminder = removeReminder;
 
     exports.run = async (client, message, arg) => {
         const reminderInfo = await parseArgs(message, arg);
