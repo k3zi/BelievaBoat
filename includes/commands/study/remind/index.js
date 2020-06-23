@@ -11,8 +11,9 @@ const WhenType = Object.freeze({
     offline: 2,
     dnd: 3,
     idle: 4,
+    busy: 3,
     isValid: (x) => [1, 2, 3, 4].includes(x),
-    toStatus: (x) => ['invalid', 'online', 'offline', 'dnd', 'idle'][x]
+    toStatus: (x) => ['invalid', 'online', 'offline', 'dnd', 'idle', 'busy'][x]
 });
 
 function parseTime(s) {
