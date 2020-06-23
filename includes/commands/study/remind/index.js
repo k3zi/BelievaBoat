@@ -14,10 +14,10 @@ const WhenType = Object.freeze({
 
 function parseTime(s) {
     const unitMapping = {
-        'd': 60 * 60 * 60 * 24,
-        'h': 60 * 60 * 60,
-        'm': 60 * 60,
-        's': 60
+        'd': 60 * 60 * 24,
+        'h': 60 * 60,
+        'm': 60,
+        's': 1
     };
 
     const matches = s.match(/\d*\.?\d+[dhms]/g);
@@ -82,6 +82,8 @@ async function parseArgs(message, arg) {
             throw new Error('`when` may only be used for recurring events.')
         }
         result.when = WhenType[args.shift()];
+    } else {
+        args.unshift(token);
     }
 
     result.message = args.join(' ');
@@ -110,7 +112,7 @@ module.exports = async (client) => {
     async function addReminder(client, reminder) {
         const now = new Date();
         if (reminder.type === ReminderType.once) {
-            const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds);
+            const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds * 1000);
             let timeot = fireDate - now;
             if (timeot <= 0) {
                 await reminder.remove();
@@ -123,19 +125,19 @@ module.exports = async (client) => {
             let nextFireDate = fireDate;
             while (nextFireDate < now) {
                 fireDate = nextFireDate;
-                nextFireDate = new Date(nextFireDate.getTime() + reminder.seconds);
+                nextFireDate = new Date(nextFireDate.getTime() + reminder.seconds * 1000);
             }
             const delayToFireDate = Math.min(0, Math.max(0, now - fireDate));
             setTimeout(() => {
                 setInterval(async () => {
                     await fireReminder(client, reminder);
-                }, reminder.seconds);
+                }, reminder.seconds * 1000);
             }, delayToFireDate);
         }
     }
 
     exports.run = async (client, message, arg) => {
-        const reminderInfo = parseArgs(message, arg);
+        const reminderInfo = await parseArgs(message, arg);
         console.log(reminderInfo);
         let remminder = new Reminder({
             channelID: message.channel.id,
