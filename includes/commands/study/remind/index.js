@@ -150,7 +150,7 @@ module.exports = async (client) => {
         });
 
         await remminder.save();
-        await addReminder(remminder);
+        await addReminder(client, remminder);
 
         let embed = client.helpers.generateSuccessEmbed(client, message.author, 'Successfully created reminder.');
         return message.channel.send(embed);
@@ -159,7 +159,7 @@ module.exports = async (client) => {
     client.on(`ready`, async () => {
         const reminders = await Reminder.find().exec();
         client.helpers.log('reminder', `scheduling ${reminders.length} reminders`);
-        await Promise.all(reminders.map(addReminder));
+        await Promise.all(reminders.map((r) => addReminder(client, r)));
     });
 
     return exports;
