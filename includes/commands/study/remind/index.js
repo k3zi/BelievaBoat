@@ -133,8 +133,6 @@ module.exports = async (client) => {
     }
 
     async function addReminder(client, reminder) {
-        const user = await client.users.fetch(reminder.userID);
-        if (!userStatusChanges.has())
         const now = new Date();
         if (reminder.type === ReminderType.once) {
             const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds * 1000);
