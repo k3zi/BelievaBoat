@@ -106,7 +106,7 @@ module.exports = async (client) => {
         const channel = client.channels.cache.get(reminder.channelID);
         const user = await client.users.fetch(reminder.userID);
         const embed = client.helpers.generateSuccessEmbed(client, user, `Reminder: ${reminder.message}`);
-        await channel.send(embed);
+        await channel.send(user, embed);
     }
 
     async function addReminder(client, reminder) {
@@ -115,10 +115,12 @@ module.exports = async (client) => {
             const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds * 1000);
             let timeot = fireDate - now;
             if (timeot <= 0) {
-                await reminder.remove();
+                await fireReminder(client, reminder);
+                return await reminder.remove();
             }
             setTimeout(async () => {
                 await fireReminder(client, reminder);
+                await reminder.remove();
             }, timeot);
         } else if (reminder.type === ReminderType.recurring) {
             let fireDate = reminder.createdAt;
