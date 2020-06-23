@@ -58,11 +58,7 @@ async function parseArgs(message, arg) {
         let match;
         if (match = token.match(/<@[!]?([0-9]+)>/)) {
             let userID = match[1];
-            if (message.guild.members.cache.has(userID)) {
-                return message.guild.members.cache.get(userID).user;
-            }
-
-            result.user = await message.guild.client.fetch(userID);
+            result.user = (await message.guild.client.fetch(userID)) || message.author;
         }
     }
 
