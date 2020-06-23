@@ -107,7 +107,7 @@ module.exports = async (client) => {
         await channel.send(embed);
     }
 
-    function addReminder(client, reminder) {
+    async function addReminder(client, reminder) {
         const now = new Date();
         if (reminder.type === ReminderType.once) {
             const fireDate = new Date(reminder.createdAt.getTime() + reminder.seconds);
@@ -148,7 +148,7 @@ module.exports = async (client) => {
         });
 
         await remminder.save();
-        addReminder(remminder);
+        await addReminder(remminder);
 
         let embed = client.helpers.generateSuccessEmbed(client, message.author, 'Successfully created reminder.');
         return message.channel.send(embed);
@@ -157,7 +157,7 @@ module.exports = async (client) => {
     client.on(`ready`, async () => {
         const reminders = await Reminder.find().exec();
         client.helpers.log('reminder', `scheduling ${reminders.length} reminders`);
-        reminders.forEach(addReminder);
+        await Promise.all(reminders.map(addReminder));
     });
 
     return exports;
