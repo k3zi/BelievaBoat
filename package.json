@@ -10,7 +10,6 @@
     "type": "git",
     "url": "git+https://github.com/k3zi/BelievaBoat.git"
   },
-  "type": "module",
   "author": "k3zi",
   "license": "MIT",
   "bugs": {

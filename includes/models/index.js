@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Promise = require('bluebird');
 const _ = require(`lodash`);
 
-import { customAlphabet } from "nanoid";
+const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 5)
 
 module.exports = (async function(client, helpers) {
