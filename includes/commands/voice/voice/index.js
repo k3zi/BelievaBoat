@@ -80,6 +80,7 @@ module.exports = (async function(bot, helpers) {
         let zeroDurationUsers = [];
         await Promise.mapSeries(voiceChannelActivities.sort((a, b) => b.startTime - a.startTime), async voiceChannelActivity => {
             if (zeroDurationUsers.includes(voiceChannelActivity.userID)) {
+                await voiceChannelActivity.remove();
                 return;
             }
             zeroDurationUsers.push(voiceChannelActivity.userID);
@@ -98,7 +99,7 @@ module.exports = (async function(bot, helpers) {
             }
 
             return Promise.map(vcRole.members.array(), async member => {
-                if (!member.voiceChannel || member.voiceChannel.parent.name.toLowerCase().includes('staff')) {
+                if (!member.voice.channel) {
                     return member.roles.remove(vcRole);
                 }
             });
@@ -138,24 +139,22 @@ module.exports = (async function(bot, helpers) {
 
         let didLog = false;
 
-        if (!member.roles.cache.get(vcRole.id) && newVoiceChannel && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
+        if (!member.roles.cache.get(vcRole.id) && newVoiceChannel) {
             await member.roles.add(vcRole);
             await logUserEnteredVoice(user, newVoiceChannel);
             didLog = true;
-        } else if (member.roles.cache.get(vcRole.id) && (!newVoiceChannel || newVoiceChannel.parent.name.toLowerCase().includes('staff'))) {
+        } else if (member.roles.cache.get(vcRole.id) && !newVoiceChannel) {
             await member.roles.remove(vcRole);
 
-            if (oldVoiceChannel && !oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
+            if (oldVoiceChannel) {
                 await logUserExitedVoice(user, oldVoiceChannel);
             }
         }
 
         if (oldVoiceChannel && newVoiceChannel && oldVoiceChannel.id != newVoiceChannel.id) {
-            if (!oldVoiceChannel.parent.name.toLowerCase().includes('staff')) {
-                await logUserExitedVoice(user, oldVoiceChannel);
-            }
+            await logUserExitedVoice(user, oldVoiceChannel);
 
-            if (!didLog && !newVoiceChannel.parent.name.toLowerCase().includes('staff')) {
+            if (!didLog) {
                 await logUserEnteredVoice(user, newVoiceChannel);
                 didLog = true;
             }
@@ -171,7 +170,7 @@ module.exports = (async function(bot, helpers) {
     });
 
     exports.run = async (bot, message, arg) => {
-        var member = message.member;
+        const member = message.member;
         if (arg.length != 0) {
             member = message.guild.members.cache.get(arg) || (message.mentions.members || (new Discord.Collection())).first();
         }
@@ -179,11 +178,6 @@ module.exports = (async function(bot, helpers) {
         if (!member) {
             return;
         }
-
-        const infoForDeletion = {
-            command: exports.meta.name,
-            channelID: message.channel.id
-        };
 
         const aggrSet = await VoiceChannelJoinActivity.aggregate([
             {
@@ -216,13 +210,13 @@ module.exports = (async function(bot, helpers) {
             return b.totalDuration - a.totalDuration;
         });
 
-        var embed = new Discord.MessageEmbed();
+        let embed = new Discord.MessageEmbed();
         embed = embed.setTitle("Voice Statistics:");
         embed = embed.setColor(helpers.colors.info);
         embed = embed.setTimestamp();
 
-        var i = 0;
-        var j = 0;
+        let i = 0;
+        let j = 0;
         while (i < sortedAggrSet.length && j < 18) {
             let ele = sortedAggrSet[i];
             let eleUser = message.guild.members.cache.get(ele._id);
