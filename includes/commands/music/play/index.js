@@ -1,5 +1,5 @@
 const Promise = require('bluebird');
-const _ = require('../../study/reminders/clear-reminder/node_modules/lodash');
+const _ = require('lodash');
 const YouTube = require('youtube-node');
 const GuildMusicManager = require('./../guildMusicManager');
 const he = require('he');
