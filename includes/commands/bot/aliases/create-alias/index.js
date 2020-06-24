@@ -8,7 +8,7 @@ module.exports = (async function(client, helpers) {
     exports.meta = {};
     exports.meta.name = `create-alias`;
     exports.meta.aliases = ['add-alias', 'createalias', 'addalias'];
-    exports.meta.description = `Creates an alias for a command. The alias can bot contain spaces.`;
+    exports.meta.description = `Creates an alias for a command. The alias can not contain spaces.`;
     exports.meta.module = 'setup';
     exports.meta.examples = ['create-alias work code', 'add-alias ban byebye'];
 

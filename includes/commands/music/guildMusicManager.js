@@ -48,14 +48,15 @@ class GuildMusicManager {
         const output = ytdl(url, {
             filter: "audioonly",
             opusEncoded: true,
-            encoderArgs: ['-af', 'bass=g=-1']
+            encoderArgs: ['-af', 'bass=g=-1'],
+            highWaterMark: 1 << 25
         });
 
         this.channel.send(this.client.helpers.generateEmbed(this.client, nextSong.user, `Now Playing: ${nextSong.title}`,  true));
         this.connection.play(output, { 
             volume: this.volume,
             type: "opus",
-            highWaterMark: 1 << 25
+            highWaterMark: 1
         })
             .on('error', (e) => {
                 console.log(e);

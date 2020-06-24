@@ -1,11 +1,7 @@
-const Discord = require('discord.js');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 module.exports = (async function(client, helpers) {
     let exports = {};
-
-    const db = client.db;
 
     exports.meta = {};
     exports.meta.name = 'queue';

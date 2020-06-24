@@ -8,7 +8,6 @@ module.exports = (async function(bot, helpers) {
     const db = bot.db;
     const VoiceChannelJoinActivity = db.model('VoiceChannelJoinActivity');
     const VoiceChannelSpeakActivity = db.model('VoiceChannelSpeakActivity');
-    const MessageDeleteWatch = db.model('MessageDeleteWatch');
 
     exports.meta = {};
     exports.meta.name = 'voice';
