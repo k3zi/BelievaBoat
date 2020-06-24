@@ -1,7 +1,8 @@
 const Promise = require('bluebird');
-const _ = require('lodash');
+const _ = require('../../study/reminders/clear-reminder/node_modules/lodash');
 const YouTube = require('youtube-node');
 const GuildMusicManager = require('./../guildMusicManager');
+const he = require('he');
 
 module.exports = async (client, helpers) => {
     let exports = {};
@@ -45,7 +46,7 @@ module.exports = async (client, helpers) => {
             throw new Error('No results found.');
         }
         const videoId = videoObject.id.videoId;
-        const videoTitle = videoObject.snippet.title;
+        const videoTitle = he.decode(videoObject.snippet.title);
         const guild = message.guild;
         
         let voiceBot;
