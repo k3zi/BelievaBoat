@@ -124,7 +124,7 @@ module.exports = async (client) => {
                 clearTimeout(timeout);
                 delete client.timeoutReminderMapping[id];
             }
-        }, (r.seconds / 10) * 1000);
+        }, (reminder.seconds / 10) * 1000);
     }
 
     async function addReminder(client, reminder) {
