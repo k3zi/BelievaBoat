@@ -112,6 +112,8 @@ module.exports = async (client) => {
         client.helpers.log('reminders', id, `starting delayed removal: ${reminder.message}`);
 
         client.delayedRemovals[id] = setTimeout(async () => {
+            delete client.delayedRemovals[id];
+            
             client.helpers.log('reminders', id, `removing timers: ${reminder.message}`);
             const interval = client.intervalReminderMapping[id];
             if (interval) {
@@ -187,7 +189,7 @@ module.exports = async (client) => {
 
     exports.run = async (client, message, arg) => {
         const reminderInfo = await parseArgs(message, arg);
-        console.log(reminderInfo);
+        client.helpers.log('reminder', 'creating', reminderInfo);
         let remminder = new Reminder({
             channelID: message.channel.id,
             guildID: message.guild.id,
