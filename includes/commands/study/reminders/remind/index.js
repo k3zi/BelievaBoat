@@ -36,7 +36,7 @@ async function parseArgs(message, arg) {
         message: null,
         seconds: 0
     };
-    const args = arg.split(' ');
+    const args = arg.split(' ').filter(s => s.trim() != '');
     let token = args.shift();
 
     if (token === 'me') {
@@ -48,6 +48,7 @@ async function parseArgs(message, arg) {
             let userID = match[1];
             result.user = (await message.guild.members.fetch(userID)) || message.author;
         }
+        token = args.shift();
     }
 
     if (token === 'in') {
@@ -67,7 +68,7 @@ async function parseArgs(message, arg) {
 
     if (token === 'when' && ['online', 'offline', 'dnd', 'idle'].includes(args[0])) {
         if (result.type !== ReminderType.recurring) {
-            throw new Error('`when` may only be used for recurring events.')
+            throw new Error('`when` may only be used for recurring events.');
         }
         result.when = WhenType[args.shift()];
     } else {
