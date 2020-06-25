@@ -213,11 +213,7 @@ module.exports = async (client) => {
     });
 
     client.on('presenceUpdate', async (oldPresence, newPresence) => {
-        if (!oldPresence) {
-            return;
-        }
-
-        if (newPresence.status === oldPresence.status) {
+        if (oldPresence && newPresence.status === oldPresence.status) {
             return;
         }
 
