@@ -198,9 +198,10 @@ module.exports = async (client) => {
             return;
         }
 
-        const user = newPresence.user;
+        const { guild, user } = newPresence;
         const reminders = await Reminder.find()
             .where('userID').equals(user.id)
+            .where('guildID').equals(guild.id)
             .exec();
         if (reminders.length === 0) {
             return;
