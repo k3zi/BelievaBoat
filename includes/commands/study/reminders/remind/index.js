@@ -129,6 +129,8 @@ module.exports = async (client) => {
 
     async function addReminder(client, reminder) {
         const id = reminder.id;
+
+        // Handle throttling.
         const throttle = client.delayedRemovals[id];
         if (throttle) {
             client.helpers.log('reminders', id, `stopping delayed removal: ${reminder.message}`);
@@ -136,11 +138,13 @@ module.exports = async (client) => {
             delete client.delayedRemovals[id];
             return;
         }
-        client.helpers.log('reminders', id, `adding timers: ${reminder.message}`);
+
         const user = await client.users.fetch(reminder.userID);
         if (WhenType.isValid(reminder.when) && user.presence.status !== WhenType.toStatus(reminder.when)) {
             return;
         }
+
+        client.helpers.log('reminders', id, `adding timers: ${reminder.message}`);
 
         const now = new Date();
         if (reminder.type === ReminderType.once) {
