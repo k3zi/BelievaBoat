@@ -36,7 +36,7 @@ async function parseArgs(message, arg) {
         message: null,
         seconds: 0
     };
-    const args = arg.split(' ').filter(s => s != '');
+    const args = arg.split(' ').filter(s => s.trim() != '');
     let token = args.shift();
 
     if (token === 'me') {
