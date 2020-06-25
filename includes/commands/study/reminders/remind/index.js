@@ -226,7 +226,7 @@ module.exports = async (client) => {
             return;
         }
 
-        client.helpers.log('reminders', `${user.username} status changed from: ${oldPresence.status} to ${newPresence.status}; adjusting ${reminders.length} reminders`);
+        client.helpers.log('reminders', `${user.username} status changed from: ${oldPresence ? oldPresence.status : 'unknown'} to ${newPresence.status}; adjusting ${reminders.length} reminders`);
         
         const validReminders = reminders.filter(r => WhenType.isValid(r.when));
         const inActiveReminders = validReminders.filter(r => WhenType.toStatus(r.when) !== newPresence.status && client.intervalReminderMapping[r.id]);
