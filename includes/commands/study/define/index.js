@@ -21,7 +21,7 @@ module.exports = async (client) => {
     const fuse = new Fuse(dictionary, options);
 
     exports.run = async (client, message, arg) => {  
-        const results = fuse.search(arg).slice(0, 3).map(x => x.item);
+        const results = fuse.search(arg).slice(0, 2).map(x => x.item);
 
         let embed = new Discord.MessageEmbed();
         embed = embed.setTitle(`Search Results for "${arg}":`);
@@ -34,7 +34,7 @@ module.exports = async (client) => {
                     ${d.senses.map((s, i) => {
                         return dedent`
                            ${i + 1}. ${s.definition}
-                           ${s.examples.slice(0, 3).map(e => '・' + e).join('\n')}
+                           ${s.examples.slice(0, 2).map(e => '・' + e).join('\n')}
                         `.trim();
                     }).join('\n')}
                 `.trim();
