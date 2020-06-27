@@ -31,7 +31,6 @@ module.exports = async (client) => {
             const definitions = r.definitions.map(d => {
                 return `
                     ${d.senses.map(s => {
-                        console.log(s);
                         return `
                            ${s.definition}
                            ${s.examples.map(e => '・' + e).join('\n')}
@@ -46,7 +45,7 @@ module.exports = async (client) => {
                 ${r.pos.map(x => `\`${x}\``).join(', ')}
                 ${definitions.join('\n')}
             `.trim();
-        }).join('\n-------\n');
+        }).join('\n--------------------\n');
         embed.setDescription(description);
 
         return message.channel.send(embed);
