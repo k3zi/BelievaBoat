@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Fuse = require('fuse.js');
 const _ = require('lodash');
-const deline = require('deline');
+const dedent = require('dedent');
 const dictionary = require('./entries.json');
 
 module.exports = async (client) => {
@@ -30,16 +30,16 @@ module.exports = async (client) => {
 
         const description = results.map(r => {
             const definitions = r.definitions.map(d => {
-                return deline`
+                return dedent`
                     ${d.senses.map((s, i) => {
-                        return deline`
+                        return dedent`
                            ${i + 1}. ${s.definition}
                            ${s.examples.slice(0, 3).map(e => '・' + e).join('\n')}
                         `.trim();
                     }).join('\n')}
                 `.trim();
             });
-            return deline`
+            return dedent`
                 **${r.headword}**  ${r.pos.map(x => `\`${x}\``).join(', ')}
                 🇺🇸: \`${r.americanIPA}\`
                 🇬🇧: \`${r.britishIPA}\`
