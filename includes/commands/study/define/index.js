@@ -28,11 +28,11 @@ module.exports = async (client) => {
         embed = embed.setTimestamp();
 
         const description = results.map(r => {
-            const definitions = r.definitions.map(d => {
+            const definitions = r.definitions.map((d, i) => {
                 return `
                     ${d.senses.map(s => {
                         return `
-                           ${s.definition}
+                           ${i}. ${s.definition}
                            ${s.examples.slice(0, 3).map(e => '・' + e).join('\n')}
                         `.trim();
                     }).join('\n')}
