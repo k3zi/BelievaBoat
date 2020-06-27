@@ -40,8 +40,8 @@ module.exports = async (client) => {
             });
             return `
                 **${r.headword}**
-                🇺🇸: ${r.americanIPA}
-                🇬🇧: ${r.britishIPA}
+                🇺🇸: \`${r.americanIPA}\`
+                🇬🇧: \`${r.britishIPA}\`
                 ${r.pos.map(x => `\`${x}\``).join(', ')}
                 ${definitions.join('\n')}
             `.trim();
