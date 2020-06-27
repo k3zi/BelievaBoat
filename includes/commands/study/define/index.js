@@ -34,13 +34,13 @@ module.exports = async (client) => {
                         return `
                            ${s.definition}
                            ${s.examples.slice(0, 3).map(e => '・' + e).join('\n')}
-                        `;
+                        `.trim();
                     }).join('\n')}
                 `.trim();
             });
             return `
-                **${r.headword}** ${r.pos.map(x => `\`${x}\``).join(', ')}
-                🇺🇸: \`${r.americanIPA}\` | 🇬🇧: \`${r.britishIPA}\`
+                **${r.headword}**  ${r.pos.map(x => `\`${x}\``).join(', ')}
+                🇺🇸: \`${r.americanIPA}\` ｜ 🇬🇧: \`${r.britishIPA}\`
                 ${definitions.join('\n')}
             `.trim();
         }).join('\n--------------------\n');
