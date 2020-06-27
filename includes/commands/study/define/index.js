@@ -36,7 +36,7 @@ module.exports = async (client) => {
                            ${s.definition}
                            ${s.examples.map(e => '・' + e).join('\n')}
                         ```;
-                    })}
+                    }).join('\n')}
                 ```.trim();
             });
             return ```
