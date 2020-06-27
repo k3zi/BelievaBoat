@@ -24,7 +24,7 @@ module.exports = async (client) => {
 
         let embed = new Discord.MessageEmbed();
         embed = embed.setTitle(`Search Results for "${arg}":`);
-        embed = embed.setColor(helpers.colors.info);
+        embed = embed.setColor(client.helpers.colors.info);
         embed = embed.setTimestamp();
 
         const description = results.map(r => {
