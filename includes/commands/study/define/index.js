@@ -29,15 +29,12 @@ module.exports = async (client) => {
 
         const description = results.map(r => {
             const definitions = r.definitions.map(d => {
-                return ```
-                    ${d.senses.map(s => {
-                        console.log(s);
-                        return ```
-                           ${s.definition}
-                           ${s.examples.map(e => '・' + e).join('\n')}
-                        ```;
-                    }).join('\n')}
-                ```.trim();
+                const sensesDescription = d.senses.map(s => {
+                    console.log(s);
+                    return [s.definition, s.examples.map(e => '・' + e).join('\n')]
+                        .map(x => x.trim).join('\n');
+                }).join('\n');
+                return sensesDescription.trim();
             });
             return ```
                 **${r.headword} (🇺🇸:${r.americanIPA}, 🇬🇧:${r.britishIPA})**
