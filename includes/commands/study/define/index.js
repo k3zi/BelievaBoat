@@ -31,6 +31,7 @@ module.exports = async (client) => {
             const definitions = r.definitions.map(d => {
                 return ```
                     ${d.senses.map(s => {
+                        console.log(s);
                         return ```
                            ${s.definition}
                            ${s.examples.map(e => '・' + e).join('\n')}
