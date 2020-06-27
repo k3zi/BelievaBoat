@@ -29,18 +29,21 @@ module.exports = async (client) => {
 
         const description = results.map(r => {
             const definitions = r.definitions.map(d => {
-                const sensesDescription = d.senses.map(s => {
-                    console.log(s);
-                    return [s.definition, s.examples.map(e => '・' + e).join('\n')]
-                        .map(x => x.trim).join('\n');
-                }).join('\n');
-                return sensesDescription.trim();
+                return `
+                    ${d.senses.map(s => {
+                        console.log(s);
+                        return `
+                           ${s.definition}
+                           ${s.examples.map(e => '・' + e).join('\n')}
+                        `;
+                    }).join('\n')}
+                `.trim();
             });
-            return ```
+            return `
                 **${r.headword} (🇺🇸:${r.americanIPA}, 🇬🇧:${r.britishIPA})**
                 *${r.pos.join(', ')}*
                 ${definitions.join('\n-------\n')}
-            ```.trim();
+            `.trim();
         });
         embed.setDescription(description);
 
