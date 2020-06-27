@@ -32,7 +32,7 @@ module.exports = async (client) => {
                 return `
                     ${d.senses.map((s, i) => {
                         return `
-                           ${i}. ${s.definition}
+                           ${i + 1}. ${s.definition}
                            ${s.examples.slice(0, 3).map(e => '・' + e).join('\n')}
                         `.trim();
                     }).join('\n')}
