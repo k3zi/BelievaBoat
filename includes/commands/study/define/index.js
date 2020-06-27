@@ -41,11 +41,11 @@ module.exports = async (client) => {
             });
             return dedent`
                 **${r.headword}**  ${r.pos.map(x => `\`${x}\``).join(', ')}
-                🇺🇸: \`${r.americanIPA}\`
-                🇬🇧: \`${r.britishIPA}\`
+                🇺🇸  \`${r.americanIPA}\`
+                🇬🇧  \`${r.britishIPA}\`
                 ${definitions.join('\n\n')}
             `.trim();
-        }).join('\n--------------------\n');
+        }).join('\n----------------------------------------\n');
         embed.setDescription(description);
 
         return message.channel.send(embed);
