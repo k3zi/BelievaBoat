@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const _ = require('lodash');
-const dictionary = require('entries.json');
+const dictionary = require('./entries.json');
 
 module.exports = async (client) => {
     let exports = {};
