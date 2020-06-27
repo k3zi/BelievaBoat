@@ -20,7 +20,7 @@ module.exports = async (client) => {
     const fuse = new Fuse(dictionary, options);
 
     exports.run = async (client, message, arg) => {  
-        const results = fuse.search(arg).slice(0, 5).map(x => x.item);
+        const results = fuse.search(arg).slice(0, 3).map(x => x.item);
 
         let embed = new Discord.MessageEmbed();
         embed = embed.setTitle(`Search Results for "${arg}":`);
@@ -44,9 +44,9 @@ module.exports = async (client) => {
                 🇺🇸: ${r.americanIPA}
                 🇬🇧: ${r.britishIPA}
                 ${r.pos.map(x => `\`${x}\``).join(', ')}
-                ${definitions.join('\n-------\n')}
+                ${definitions.join('\n')}
             `.trim();
-        });
+        }).join('\n-------\n');
         embed.setDescription(description);
 
         return message.channel.send(embed);
