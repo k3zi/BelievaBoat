@@ -189,7 +189,9 @@ module.exports = (async function(bot, helpers) {
                             if: {
                                 $eq: ['$duration', 0]
                             },
-                            then: '$duration',
+                            then: {
+                                $subtract: [new Date(), "$start"]
+                            },
                             else: '$duration'
                         }
                     }
