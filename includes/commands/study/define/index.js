@@ -28,9 +28,9 @@ module.exports = async (client) => {
         embed = embed.setTimestamp();
 
         const description = results.map(r => {
-            const definitions = r.definitions.map((d, i) => {
+            const definitions = r.definitions.map(d => {
                 return `
-                    ${d.senses.map(s => {
+                    ${d.senses.map((s, i) => {
                         return `
                            ${i}. ${s.definition}
                            ${s.examples.slice(0, 3).map(e => '・' + e).join('\n')}
@@ -41,7 +41,7 @@ module.exports = async (client) => {
             return `
                 **${r.headword}**  ${r.pos.map(x => `\`${x}\``).join(', ')}
                 🇺🇸: \`${r.americanIPA}\` ｜ 🇬🇧: \`${r.britishIPA}\`
-                ${definitions.join('\n')}
+                ${definitions.join('\n\n')}
             `.trim();
         }).join('\n--------------------\n');
         embed.setDescription(description);
