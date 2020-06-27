@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const Fuse = require('fuse.js');
 const _ = require('lodash');
 const dictionary = require('./entries.json');
 
