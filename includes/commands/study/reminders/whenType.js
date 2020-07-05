@@ -4,6 +4,7 @@ module.exports = Object.freeze({
     dnd: 3,
     idle: 4,
     busy: 3,
-    isValid: (x) => [1, 2, 3, 4].includes(x),
-    toStatus: (x) => ['invalid', 'online', 'offline', 'dnd', 'idle', 'busy'][x]
+    vc: 5,
+    isValid: (x) => [1, 2, 3, 4, 5].includes(x),
+    toStatus: (x) => ['invalid', 'online', 'offline', 'dnd', 'idle', 'busy', 'vc'][x]
 });
