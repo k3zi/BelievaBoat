@@ -1,6 +1,4 @@
-const Discord = require('discord.js');
-const Promise = require('bluebird');
-const _ = require(`../commands/study/reminders/clear-reminder/node_modules/lodash`);
+const _ = require('lodash');
 const shortid = require('shortid');
 
 module.exports = (async function(client, helpers) {
