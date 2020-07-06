@@ -1,4 +1,5 @@
 const ytdl = require("discord-ytdl-core");
+const _ = require('lodash');
 
 class GuildMusicManager {
 
@@ -66,6 +67,33 @@ class GuildMusicManager {
                 console.log('finished playing song');
                 self.playNext();
             });
+    }
+
+    async pause() {
+        const dispatcher = this.connection.dispatcher;
+        if (dispatcher) {
+            dispatcher.pause();
+        }
+    }
+
+    async resume() {
+        const dispatcher = this.connection.dispatcher;
+        if (dispatcher) {
+            dispatcher.resume();
+        }
+    }
+
+    async shuffle() {
+        this.queue = _.shuffle(this.queue);
+    }
+
+    async disconnect() {
+        this.isPlaying = false;
+        this.connection.disconnect();
+    }
+
+    async clearQueue() {
+        this.queue = [];
     }
 
     setVolume(newVolume) {

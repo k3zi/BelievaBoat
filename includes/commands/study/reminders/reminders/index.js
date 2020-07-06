@@ -1,6 +1,3 @@
-const Discord = require('discord.js');
-const _ = require('lodash');
-
 const ReminderType = require('./../reminderType');
 const WhenType = require('./../whenType');
 const moment = require('moment');

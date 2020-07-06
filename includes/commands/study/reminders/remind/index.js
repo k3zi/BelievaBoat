@@ -34,7 +34,8 @@ async function parseArgs(message, arg) {
         user: message.author,
         when: null,
         message: null,
-        seconds: 0
+        seconds: 0,
+        viaDM: false
     };
     const args = arg.split(' ').filter(s => s.trim() != '');
     let token = args.shift();
@@ -44,7 +45,7 @@ async function parseArgs(message, arg) {
         token = args.shift();
     } else {
         let match;
-        if (match = token.match(/<@[!]?([0-9]+)>/)) {
+        if (match = token.match(/<?@?[!]?([0-9]+)>?/)) {
             let userID = match[1];
             result.user = (await message.guild.members.fetch(userID)) || message.author;
         }
@@ -75,6 +76,13 @@ async function parseArgs(message, arg) {
         args.unshift(token);
     }
 
+    if (token === 'via' && args[0] === 'dm') {
+        result.viaDM = true;
+        args.shift();
+    } else {
+        args.unshift(token);
+    }
+
     result.message = args.join(' ');
     return result;
 }
@@ -86,7 +94,7 @@ module.exports = async (client) => {
     exports.meta.name = 'remind';
     exports.meta.description = 'Displays the list of songs in the queue.';
     exports.meta.module = 'study';
-    exports.meta.examples = ['remind @user in 2h go walk the dog'];
+    exports.meta.examples = ['remind me every 5m30s 5 minutes and 30 seconds passed', 'remind @user in 2h go walk the dog', 'remind @user every 1h when online take a break'];
     exports.meta.aliases = [];
 
     const Reminder = client.db.model('Reminder');
@@ -113,7 +121,7 @@ module.exports = async (client) => {
 
         client.delayedRemovals[id] = setTimeout(async () => {
             delete client.delayedRemovals[id];
-            
+
             client.helpers.log('reminders', id, `removing timers: ${reminder.message}`);
             const interval = client.intervalReminderMapping[id];
             if (interval) {

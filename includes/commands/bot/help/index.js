@@ -41,7 +41,7 @@ module.exports = (async function(client, helpers) {
                 await Promise.delay(450);
             }
 
-            if (index < descriptions.length) {
+            if ((index + 1) < descriptions.length) {
                 await message.react('➡');
                 await Promise.delay(450);
             }
