@@ -28,6 +28,7 @@ async function parseArgs(message, arg) {
     }
 
     if (token === 'when') {
+        token = args.shift();
         let match;
         if (match = token.match(/<?@?[!]?([0-9]+)>?/)) {
             let userID = match[1];
@@ -35,8 +36,9 @@ async function parseArgs(message, arg) {
             token = args.shift();
         }
 
-        if (['online', 'offline', 'dnd', 'idle', 'vc'].includes(args[0])) {
-            result.when = WhenType[args.shift()];
+        if (['online', 'offline', 'dnd', 'idle', 'vc'].includes(token)) {
+            result.when = WhenType[token];
+            token = args.shift();
         } else {
             throw new Error('Invalid `when` type provided.');
         }
