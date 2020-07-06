@@ -26,7 +26,7 @@ module.exports = async (client) => {
         const alert = alerts[0];
         const id = alert.id;
 
-        await reminder.remove();
+        await alert.remove();
 
         let embed = client.helpers.generateSuccessEmbed(client, message.author, `Removed alert: ${id}.`);
         return message.channel.send(embed);
