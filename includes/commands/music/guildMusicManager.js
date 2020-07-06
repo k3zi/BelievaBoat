@@ -1,4 +1,5 @@
 const ytdl = require("discord-ytdl-core");
+const _ = require('lodash');
 
 class GuildMusicManager {
 
