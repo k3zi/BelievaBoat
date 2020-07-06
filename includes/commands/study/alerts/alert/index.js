@@ -36,7 +36,7 @@ async function parseArgs(message, arg) {
             token = args.shift();
         }
 
-        if (['online', 'offline', 'dnd', 'idle', 'vc'].includes(token)) {
+        if (['online', 'offline', 'dnd', 'idle', 'busy', 'vc'].includes(token)) {
             result.when = WhenType[token];
             token = args.shift();
         } else {
@@ -112,7 +112,7 @@ module.exports = async (client) => {
 
         const { guild, user } = newPresence;
         const alerts = await Alert.find()
-            .where('userID').equals(user.id)
+            .where('referenceUserID').equals(user.id)
             .where('guildID').equals(guild.id)
             .exec();
         if (alerts.length === 0) {
@@ -136,7 +136,7 @@ module.exports = async (client) => {
         }
 
         const alerts = await Alert.find()
-            .where('userID').equals(user.id)
+            .where('referenceUserID').equals(user.id)
             .where('guildID').equals(member.guild.id)
             .exec();
         if (alerts.length === 0) {
