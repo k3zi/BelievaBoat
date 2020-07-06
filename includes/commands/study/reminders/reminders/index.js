@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const _ = require('lodash');
+const _ = require('../clear-reminder/node_modules/lodash');
 
 const ReminderType = require('./../reminderType');
 const WhenType = require('./../whenType');

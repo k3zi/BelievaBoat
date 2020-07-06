@@ -82,6 +82,10 @@ class GuildMusicManager {
         }
     }
 
+    async shuffle() {
+        this.queue = _.shuffle(this.queue);
+    }
+
     setVolume(newVolume) {
         this.volume = newVolume;
         const dispatcher = this.connection.dispatcher;
