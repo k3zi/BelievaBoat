@@ -92,6 +92,7 @@ module.exports = async (client) => {
     const Reminder = client.db.model('Reminder');
     client.intervalReminderMapping = {};
     client.timeoutReminderMapping = {};
+    client.delayedRemovals = {};
 
     async function fireReminder(client, reminder) {
         const channel = client.channels.cache.get(reminder.channelID);
@@ -104,24 +105,48 @@ module.exports = async (client) => {
 
     async function removeReminder(client, reminder) {
         const id = reminder.id;
-        const interval = client.intervalReminderMapping[id];
-        if (interval) {
-            clearInterval(interval);
-            delete client.intervalReminderMapping[id];
+        client.helpers.log('reminders', id, `delayed removal invoked: ${reminder.message}`);
+        if (client.delayedRemovals[id]) {
+            return;
         }
+        client.helpers.log('reminders', id, `starting delayed removal: ${reminder.message}`);
 
-        const timeout = client.timeoutReminderMapping[id];
-        if (timeout) {
-            clearTimeout(timeout);
-            delete client.timeoutReminderMapping[id];
-        }
+        client.delayedRemovals[id] = setTimeout(async () => {
+            delete client.delayedRemovals[id];
+            
+            client.helpers.log('reminders', id, `removing timers: ${reminder.message}`);
+            const interval = client.intervalReminderMapping[id];
+            if (interval) {
+                clearInterval(interval);
+                delete client.intervalReminderMapping[id];
+            }
+
+            const timeout = client.timeoutReminderMapping[id];
+            if (timeout) {
+                clearTimeout(timeout);
+                delete client.timeoutReminderMapping[id];
+            }
+        }, (reminder.seconds / 10) * 1000);
     }
 
     async function addReminder(client, reminder) {
+        const id = reminder.id;
+
+        // Handle throttling.
+        const throttle = client.delayedRemovals[id];
+        if (throttle) {
+            client.helpers.log('reminders', id, `stopping delayed removal: ${reminder.message}`);
+            clearTimeout(throttle);
+            delete client.delayedRemovals[id];
+            return;
+        }
+
         const user = await client.users.fetch(reminder.userID);
         if (WhenType.isValid(reminder.when) && user.presence.status !== WhenType.toStatus(reminder.when)) {
             return;
         }
+
+        client.helpers.log('reminders', id, `adding timers: ${reminder.message}`);
 
         const now = new Date();
         if (reminder.type === ReminderType.once) {
@@ -135,7 +160,7 @@ module.exports = async (client) => {
                 await fireReminder(client, reminder);
                 await reminder.remove();
             }, timeot);
-            client.timeoutReminderMapping[reminder.id] = timeout;
+            client.timeoutReminderMapping[id] = timeout;
         } else if (reminder.type === ReminderType.recurring) {
             let fireDate = reminder.createdAt;
             if (WhenType.isValid(reminder.when)) {
@@ -153,9 +178,9 @@ module.exports = async (client) => {
                 const interval = setInterval(async () => {
                     await fireReminder(client, reminder);
                 }, reminder.seconds * 1000);
-                client.intervalReminderMapping[reminder.id] = interval;
+                client.intervalReminderMapping[id] = interval;
             }, delayToFireDate);
-            client.timeoutReminderMapping[reminder.id] = timeout;
+            client.timeoutReminderMapping[id] = timeout;
         }
     }
 
@@ -164,7 +189,7 @@ module.exports = async (client) => {
 
     exports.run = async (client, message, arg) => {
         const reminderInfo = await parseArgs(message, arg);
-        console.log(reminderInfo);
+        client.helpers.log('reminder', 'creating', reminderInfo);
         let remminder = new Reminder({
             channelID: message.channel.id,
             guildID: message.guild.id,
@@ -190,11 +215,7 @@ module.exports = async (client) => {
     });
 
     client.on('presenceUpdate', async (oldPresence, newPresence) => {
-        if (!oldPresence) {
-            return;
-        }
-
-        if (newPresence.status === oldPresence.status) {
+        if (oldPresence && newPresence.status === oldPresence.status) {
             return;
         }
 
@@ -207,11 +228,11 @@ module.exports = async (client) => {
             return;
         }
 
-        client.helpers.log('reminders', `${user.username} status changed from: ${oldPresence.status} to ${newPresence.status}; adjusting ${reminders.length} reminders`);
+        client.helpers.log('reminders', `${user.username} status changed from: ${oldPresence ? oldPresence.status : 'unknown'} to ${newPresence.status}; adjusting ${reminders.length} reminders`);
         
         const validReminders = reminders.filter(r => WhenType.isValid(r.when));
         const inActiveReminders = validReminders.filter(r => WhenType.toStatus(r.when) !== newPresence.status && client.intervalReminderMapping[r.id]);
-        const activeReminders = validReminders.filter(r => WhenType.toStatus(r.when) === newPresence.status && !client.intervalReminderMapping[r.id]);
+        const activeReminders = validReminders.filter(r => WhenType.toStatus(r.when) === newPresence.status && (!client.intervalReminderMapping[r.id] || client.delayedRemovals[r.id]));
         await Promise.all(inActiveReminders.map((r) => removeReminder(client, r)));
         await Promise.all(activeReminders.map((r) => addReminder(client, r)));
     });
