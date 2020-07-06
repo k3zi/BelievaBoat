@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require('../../study/reminders/clear-reminder/node_modules/lodash');
 
 module.exports = (async function(client, helpers) {
     let exports = {};
@@ -7,7 +7,7 @@ module.exports = (async function(client, helpers) {
     exports.meta.name = 'queue';
     exports.meta.description = 'Displays the list of songs in the queue.';
     exports.meta.module = 'music';
-    exports.meta.examples = [];
+    exports.meta.examples = ['queue'];
     exports.meta.aliases = ['upcoming'];
 
     exports.run = async (client, message, arg) => {

@@ -68,6 +68,20 @@ class GuildMusicManager {
             });
     }
 
+    async pause() {
+        const dispatcher = this.connection.dispatcher;
+        if (dispatcher) {
+            dispatcher.pause();
+        }
+    }
+
+    async resume() {
+        const dispatcher = this.connection.dispatcher;
+        if (dispatcher) {
+            dispatcher.resume();
+        }
+    }
+
     setVolume(newVolume) {
         this.volume = newVolume;
         const dispatcher = this.connection.dispatcher;
