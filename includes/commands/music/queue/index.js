@@ -1,5 +1,3 @@
-const _ = require('../../study/reminders/clear-reminder/node_modules/lodash');
-
 module.exports = (async function(client, helpers) {
     let exports = {};
 
