@@ -87,6 +87,15 @@ class GuildMusicManager {
         this.queue = _.shuffle(this.queue);
     }
 
+    async disconnect() {
+        this.isPlaying = false;
+        this.connection.disconnect();
+    }
+
+    async clearQueue() {
+        this.queue = [];
+    }
+
     setVolume(newVolume) {
         this.volume = newVolume;
         const dispatcher = this.connection.dispatcher;
