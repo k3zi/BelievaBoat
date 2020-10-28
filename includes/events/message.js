@@ -24,10 +24,11 @@ module.exports = (async function(client, helpers) {
         const delimeters = ['　', '、', ',', '。', '.']
             .filter(s => s != prefix);
 
+        // This is a lot of hacking. I'm dissapointed in myself.
         const randomJoinChar = '®';
-        let content = message.content.split(' ').join(randomJoinChar);
+        let content = message.content.split(' ').join(`${randomJoinChar} ${randomJoinChar}`);
         for (let delimeter of delimeters) {
-            content = content.split(delimeter).join(randomJoinChar);
+            content = content.split(delimeter).join(`${randomJoinChar}${delimeter}${randomJoinChar}`);
         }
         content = content.split(randomJoinChar);
         console.log(`content:`);
