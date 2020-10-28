@@ -17,14 +17,14 @@ module.exports = (async function(client, helpers) {
             return;
         }
 
-        let content = message.content.split(` `);
+        let content = message.content.split(/[\s 　、,。\.]+/);
         let command = content.shift();
         let dbGuild = await Guild.get(message.guild.id);
         let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
 
-        if (command.startsWith(prefix)) {
+        if (command.startsWith(prefix) || dbGuild.settings.disablePrefix) {
             let arg = content.join(` `);
-            command = command.slice(prefix.length);
+            command = command.startsWith(prefix) ? command.slice(prefix.length) : command;
 
             // checks if message contains a command and runs it
             let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);

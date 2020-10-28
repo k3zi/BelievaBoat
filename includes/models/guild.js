@@ -68,6 +68,7 @@ module.exports = (async function(client, helpers) {
                 aliases: [],
                 removedAliases: [],
                 prefix: client.config.defaultPrefix,
+                disablePrefix: false
             };
         }
 
