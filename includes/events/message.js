@@ -18,11 +18,14 @@ module.exports = (async function(client, helpers) {
         }
 
         let content = message.content.split(/[\s 　、,。\.]+/);
+        console.log(`content: ${content}`);
         let command = content.shift();
+        console.log(`command: ${command}`);
         let dbGuild = await Guild.get(message.guild.id);
         let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
 
         if (command.startsWith(prefix) || dbGuild.settings.disablePrefix) {
+            console.log(`entered command prompt`);
             let arg = content.join(` `);
             command = command.startsWith(prefix) ? command.slice(prefix.length) : command;
 
