@@ -46,6 +46,7 @@ module.exports = (async function(client, helpers) {
             // checks if message contains a command and runs it
             let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
             if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
+                console.log('can run command');
                 message.dbGuild = dbGuild;
                 let sentMessage;
                 try {
