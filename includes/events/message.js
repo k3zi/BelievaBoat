@@ -41,6 +41,7 @@ module.exports = (async function(client, helpers) {
             console.log(`entered command prompt`);
             let arg = content.join(` `);
             command = command.startsWith(prefix) ? command.slice(prefix.length) : command;
+            console.log(`command2: ${command}`);
 
             // checks if message contains a command and runs it
             let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
