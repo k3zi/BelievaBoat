@@ -17,12 +17,25 @@ module.exports = (async function(client, helpers) {
             return;
         }
 
-        let content = message.content.split(/[\s 　、,。\.]+/);
-        console.log(`content: ${content}`);
-        let command = content.shift();
-        console.log(`command: ${command}`);
         let dbGuild = await Guild.get(message.guild.id);
         let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
+
+        const delimeters = ['　', '、', ',', '。', '.']
+            .filter(s => s != prefix);
+
+        const randomJoinChar = '®';
+        let content = message.content.split(' ').join(randomJoinChar);
+        for (let delimeter of delimeters) {
+            content = content.split(delimeter).join(randomJoinChar);
+        }
+        content = content.split(randomJoinChar);
+        console.log(`content:`);
+        console.log(content);
+        let command = content.shift();
+        while (command.length == 0 && content.length > 0) {
+            command = content.shift();
+        }
+        console.log(`command: ${command}`);
 
         if (command.startsWith(prefix) || dbGuild.settings.disablePrefix) {
             console.log(`entered command prompt`);
