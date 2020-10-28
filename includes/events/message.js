@@ -18,6 +18,7 @@ module.exports = (async function(client, helpers) {
         }
 
         let dbGuild = await Guild.get(message.guild.id);
+        message.dbGuild = dbGuild;
         let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
 
         const delimeters = ['　', '、', ',', '。', '.']
@@ -44,13 +45,18 @@ module.exports = (async function(client, helpers) {
             console.log(`command2: ${command}`);
 
             // checks if message contains a command and runs it
-            let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
-            if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
-                console.log('can run command');
-                message.dbGuild = dbGuild;
+            const commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
+            if (commandfile) {
+                console.log('command file found');
+
                 let sentMessage;
                 try {
-                    sentMessage = await commandfile.run(client, message, arg);
+                    if (dbGuild.can(message.member).run(commandfile).in(message.channel)) {
+                        console.log('can run command');
+                        sentMessage = await commandfile.run(client, message, arg);
+                    } else {
+                        throw new Error("You do not have permission to execute this command.");
+                    }
                 } catch (error) {
                     console.log(error);
                     let embed = client.helpers.generateErrorEmbed(client, undefined, error);
