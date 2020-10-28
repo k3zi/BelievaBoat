@@ -31,29 +31,23 @@ module.exports = (async function(client, helpers) {
             content = content.split(delimeter).join(`${randomJoinChar}${delimeter}${randomJoinChar}`);
         }
         content = content.split(randomJoinChar);
-        console.log(`content:`);
-        console.log(content);
+
         let command = content.shift();
         while (command.length == 0 && content.length > 0) {
             command = content.shift();
         }
-        console.log(`command: ${command}`);
 
         if (command.startsWith(prefix) || dbGuild.settings.disablePrefix) {
-            console.log(`entered command prompt`);
             let arg = content.join(` `);
             command = command.startsWith(prefix) ? command.slice(prefix.length) : command;
-            console.log(`command2: ${command}`);
 
             // checks if message contains a command and runs it
             const commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
             if (commandfile) {
-                console.log('command file found');
 
                 let sentMessage;
                 try {
                     if (dbGuild.can(message.member).run(commandfile).in(message.channel)) {
-                        console.log('can run command');
                         sentMessage = await commandfile.run(client, message, arg);
                     } else {
                         throw new Error("You do not have permission to execute this command.");
