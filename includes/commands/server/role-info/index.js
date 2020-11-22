@@ -39,7 +39,7 @@ module.exports = (async function(client, helpers) {
 
         let svgFile = roleColorIconSVG.replace(/\$\{role\.hexColor\}/gi, role.hexColor);
         let imageData = await sharp(Buffer.from(svgFile)).png().toBuffer();
-        let svgFileAttachment = new Discord.Attachment(imageData, 'roleColorIcon.png');
+        let svgFileAttachment = new Discord.MessageAttachment(imageData, 'roleColorIcon.png');
         embed = embed.attachFiles([svgFileAttachment]);
         embed = embed.setAuthor(`Role Information: ${role.name}`, `attachment://roleColorIcon.png`);
 
