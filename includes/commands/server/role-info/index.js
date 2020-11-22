@@ -54,7 +54,7 @@ module.exports = (async function(client, helpers) {
         embed = embed.addField('Hoisted:', `${role.hoist ? `Yes` : `No`}`, true);
         embed = embed.addField('Mentionable:', `${role.mentionable ? `Yes` : `No`}`, true);
 
-        let permissions = client.helpers.joinCode(Object.entries(client.helpers.permissionsToHumanReadable).filter(e => role.hasPermission(e[0])).map(e => e[1]), ` ・ `) || `None`;
+        let permissions = client.helpers.joinCode(Object.entries(client.helpers.permissionsToHumanReadable).filter(e => role.permissions.has(e[0])).map(e => e[1]), ` ・ `) || `None`;
         embed = embed.addField('Permissions:', permissions, false);
         embed = client.helpers.addSenderToFooter(embed, message, 'requested this information');
         embed = embed.setTimestamp(message.createdAt);
