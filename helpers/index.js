@@ -199,20 +199,20 @@ helpers.findChannel = async function (guild, value) {
 
 helpers.findRole = async function (guild, value) {
     value = value + '';
-    if (guild.roles.has(value)) {
-        return guild.roles.get(value);
+    if (guild.roles.cache.has(value)) {
+        return guild.roles.cache.get(value);
     }
 
     var match;
     if (match = value.match(/<@&([0-9]+)>/)) {
         let roleID = match[1];
-        if (guild.roles.has(roleID)) {
-            return guild.roles.get(roleID);
+        if (guild.roles.cache.has(roleID)) {
+            return guild.roles.cache.get(roleID);
         }
     }
 
     value = value.toLowerCase();
-    let searchRoles = guild.roles.filter(r => helpers.startsWith(r.name, value));
+    let searchRoles = guild.roles.cache.filter(r => helpers.startsWith(r.name, value));
     if (searchRoles.size === 1) {
         return searchRoles.first();
     }
