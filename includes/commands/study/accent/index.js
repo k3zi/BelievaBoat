@@ -36,7 +36,7 @@ const accentsForArray = (accents) => {
         const output = accent.accent.map(a =>
             accentOutput(a.pronunciation, a.pitchAccent)
         ).join('・');
-        result.push(` ・［${accent.accent.map(a => a.pitchAccent).join('・')}］${output}`);
+        result.push(` ・[［${accent.accent.map(a => a.pitchAccent).join('・')}］${output}](https://kez.io/nhk/audio/${accent.soundFile})`);
     }
     return result;
 };

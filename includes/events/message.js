@@ -17,22 +17,41 @@ module.exports = (async function(client, helpers) {
             return;
         }
 
-        let content = message.content.split(` `);
-        let command = content.shift();
         let dbGuild = await Guild.get(message.guild.id);
+        message.dbGuild = dbGuild;
         let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
 
-        if (command.startsWith(prefix)) {
+        const delimeters = ['　', '、', ',', '。', '.']
+            .filter(s => s != prefix);
+
+        // This is a lot of hacking. I'm dissapointed in myself.
+        const randomJoinChar = '®';
+        let content = message.content.split(' ').join(`${randomJoinChar} ${randomJoinChar}`);
+        for (let delimeter of delimeters) {
+            content = content.split(delimeter).join(`${randomJoinChar}${delimeter}${randomJoinChar}`);
+        }
+        content = content.split(randomJoinChar);
+
+        let command = content.shift();
+        while (command.length == 0 && content.length > 0) {
+            command = content.shift();
+        }
+
+        if (command.startsWith(prefix) || dbGuild.settings.disablePrefix) {
             let arg = content.join(` `);
-            command = command.slice(prefix.length);
+            command = command.startsWith(prefix) ? command.slice(prefix.length) : command;
 
             // checks if message contains a command and runs it
-            let commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
-            if (commandfile && dbGuild.can(message.member).run(commandfile).in(message.channel)) {
-                message.dbGuild = dbGuild;
+            const commandfile = client.helpers.innerSearchCommands(client, dbGuild, command);
+            if (commandfile) {
+
                 let sentMessage;
                 try {
-                    sentMessage = await commandfile.run(client, message, arg);
+                    if (dbGuild.can(message.member).run(commandfile).in(message.channel)) {
+                        sentMessage = await commandfile.run(client, message, arg);
+                    } else {
+                        throw new Error("You do not have permission to execute this command.");
+                    }
                 } catch (error) {
                     console.log(error);
                     let embed = client.helpers.generateErrorEmbed(client, undefined, error);
