@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const Promise = require('bluebird');
 const _ = require('lodash');
 
 const helpers = {};
@@ -175,7 +174,7 @@ helpers.findChannelCategory = async function (guild, value) {
 
 helpers.findChannel = async function (guild, value) {
     value = value + '';
-    let guildChannels = guild.channels.filter(x => x.type === `text`);
+    let guildChannels = guild.channels.cache.filter(x => x.type === `text`);
     if (guildChannels.has(value)) {
         return guildChannels.get(value);
     }
