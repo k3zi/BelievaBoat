@@ -1,10 +1,3 @@
-const Discord = require('discord.js');
-const Promise = require('bluebird');
-const moment = require('moment');
-const _ = require('lodash');
-const fs = Promise.promisifyAll(require('fs'));
-const numeral = require('numeral');
-
 module.exports = (async function(client, helpers) {
     const exports = {};
 
