@@ -1,10 +1,3 @@
-const Discord = require('discord.js');
-const Promise = require('bluebird');
-const moment = require('moment');
-const _ = require('lodash');
-const fs = Promise.promisifyAll(require('fs'));
-const numeral = require('numeral');
-
 module.exports = (async function(client, helpers) {
     const exports = {};
 
@@ -16,7 +9,7 @@ module.exports = (async function(client, helpers) {
     exports.meta.examples = ['set-greeting-channel general'];
 
     exports.run = async (client, message, arg) => {
-        let { dbGuild, guild } = message;
+        const { dbGuild, guild } = message;
         const channel = await client.helpers.findChannel(guild, arg);
 
         if (!channel) {
@@ -28,7 +21,7 @@ module.exports = (async function(client, helpers) {
         dbGuild.markModified(`settings`);
         await dbGuild.save();
 
-        let embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot greeting message channel has been changed to \`${channel.name}\`.`);
+        const embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot greeting message channel has been changed to \`${channel.name}\`.`);
         return message.channel.send({ embed });
     };
 
