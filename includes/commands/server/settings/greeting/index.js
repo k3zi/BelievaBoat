@@ -1,4 +1,4 @@
-module.exports = (async function(client, helpers) {
+module.exports = (async (client, helpers) => {
     const exports = {};
 
     exports.meta = {};
@@ -9,13 +9,17 @@ module.exports = (async function(client, helpers) {
     exports.meta.examples = ['set-greeting Hellllllllo this is yudai'];
 
     exports.run = async (client, message, arg) => {
-        let { dbGuild, guild } = message;
+        const { dbGuild, guild } = message;
 
+        if (arg.length === 0) {
+           throw new Error("No argument was provided.");
+        }
+        
         dbGuild.settings.greeting = arg;
         dbGuild.markModified(`settings`);
         await dbGuild.save();
 
-        let embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot greeting message has been changed to \`${arg}\`.`);
+        const embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot greeting message has been changed to \`${arg}\`.`);
         return message.channel.send({ embed });
     };
 
