@@ -14,7 +14,7 @@ module.exports = async function(client, helpers) {
 
         const { greetingChannelID, greeting } = dbGuild.settings;
 
-        if (!greetingChannelID || greeting.length == 0 || greetingChannelID.length == 0) {
+        if (greeting.length == 0 || greetingChannelID.length == 0) {
             return;
         }
 
