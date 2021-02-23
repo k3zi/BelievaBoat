@@ -5,6 +5,7 @@ const _ = require('lodash');
 const fs = Promise.promisifyAll(require('fs'));
 const numeral = require('numeral');
 const util = require('util');
+const fetch = require('node-fetch');
 
 const smallrowKatakana = 'ァィゥェォヵㇰヶㇱㇲㇳㇴㇵㇶㇷㇷ゚ㇸㇹㇺャュョㇻㇼㇽㇾㇿヮ';
 const accentOutput = (word, accent) => {
@@ -23,7 +24,7 @@ const accentOutput = (word, accent) => {
         }
 
         if (mora === accent) {
-            output += "＼"
+            output += "＼";
         }
     }
 
@@ -81,7 +82,6 @@ module.exports = (async function(client, helpers) {
         let embed = new Discord.MessageEmbed().setTitle("Accent for: " + word).setTimestamp();
         var combinedAccents = [];
         for (let result of results) {
-            console.log(results);
             let i = 0;
             const accents = [
                 ...(accentsForArray(result.accents)),
@@ -91,11 +91,28 @@ module.exports = (async function(client, helpers) {
 
             const kanjiOutput = result.kanji.length ? `【 ${result.kanji.join('、')}】` : '';
             const usageOutput = result.usage ? `（${result.usage}）` : '';
-            combinedAccents.push(`${result.kana}${kanjiOutput}${usageOutput}\n${accents.join('\n')}`)
+            combinedAccents.push(`${result.kana}${kanjiOutput}${usageOutput}\n${accents.join('\n')}`);
         }
 
-        embed = embed.setDescription(combinedAccents.join('\n\n'));
-        embed = embed.setColor(client.helpers.colors.info);
+        if (client.config.kotuAPIKey && client.config.kotuAPIKey.length > 0 && results.length === 0) {
+            const sentenceResponse = await fetch(`https://kotu.io/api/lists/sentence/parse`, {
+                method: 'POST',
+                body: word,
+                headers: {
+                    'Authorization': `Bearer ${client.config.kotuAPIKey}`
+                }
+            });
+            let sentences = await sentenceResponse.json();
+            const phrases = _.flatten(sentences.map(s => s.accentPhrases));
+            const output = phrases.map(p => accentOutput(p.pronunciation, p.pitchAccent.mora)).join('　');
+
+            embed.setDescription(`My Guess:\n${output}`);
+            embed.setFooter('Drops are indicated by ＼. Phrases are seperated by spaces. Phrases without drops are flat.');
+        } else {
+            embed.setDescription(combinedAccents.join('\n\n'));
+        }
+
+        embed.setColor(client.helpers.colors.info);
 
         return message.channel.send({ embed });
     };
