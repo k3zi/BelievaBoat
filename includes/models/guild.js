@@ -68,7 +68,9 @@ module.exports = (async function(client, helpers) {
                 aliases: [],
                 removedAliases: [],
                 prefix: client.config.defaultPrefix,
-                disablePrefix: false
+                disablePrefix: false,
+                greeting: "",
+                greetingChannelID: ""
             };
         }
 
@@ -82,6 +84,14 @@ module.exports = (async function(client, helpers) {
 
         if (!guild.settings.logs) {
             guild.settings.logs = [];
+        }
+
+        if (!guild.settings.greeting) {
+            guild.settings.greeting = "";
+        }
+
+        if (!guild.settings.greetingChannelID) {
+            guild.settings.greetingChannelID = "";
         }
 
          return guild.save();

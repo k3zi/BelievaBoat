@@ -22,11 +22,11 @@ module.exports = (async function(client, helpers) {
             throw new Error(`No arguments were provided.`);
         }
 
-        if (arg.length > 1) {
-            throw new Error(`The bot prefix nust not contain a space.`);
+        if (args.length > 1) {
+            throw new Error(`The bot prefix must not contain a space.`);
         }
 
-        let newPrefix = arg[0];
+        let newPrefix = args[0];
         dbGuild.settings.prefix = newPrefix;
         dbGuild.markModified(`settings`);
         await dbGuild.save();
