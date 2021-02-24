@@ -15,7 +15,7 @@ module.exports = (async function(client, helpers) {
     exports.meta.name = 'user-info';
     exports.meta.aliases = ['profile', 'user'];
     exports.meta.description = 'Shows info related to the provided user or message author.';
-    exports.meta.module = 'server';
+    exports.meta.module = 'info';
     exports.meta.examples = ['profile', 'user-info @27'];
 
     exports.run = async (client, message, arg) => {

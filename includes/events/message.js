@@ -19,13 +19,12 @@ module.exports = (async function(client, helpers) {
 
         let dbGuild = await Guild.get(message.guild.id);
         message.dbGuild = dbGuild;
-        let prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
-
+        const prefix = (dbGuild.settings.prefix || ``).trim().length > 0 ? dbGuild.settings.prefix : client.config.defaultPrefix;
         const delimeters = ['　', '、', ',', '。', '.']
             .filter(s => s != prefix);
 
         // This is a lot of hacking. I'm dissapointed in myself.
-        const randomJoinChar = '®';
+        const randomJoinChar = '↉';
         let content = message.content.split(' ').join(`${randomJoinChar} ${randomJoinChar}`);
         for (let delimeter of delimeters) {
             content = content.split(delimeter).join(`${randomJoinChar}${delimeter}${randomJoinChar}`);
@@ -36,9 +35,18 @@ module.exports = (async function(client, helpers) {
         while (command.length == 0 && content.length > 0) {
             command = content.shift();
         }
+        content = content
+            .join(randomJoinChar)
+            .split(`${randomJoinChar} ${randomJoinChar}`)
+            .join(' ')
+            .split(`${randomJoinChar}`)
+            .join('');
+        for (let delimeter of delimeters) {
+            content = content.split(`${randomJoinChar}${delimeter}${randomJoinChar}`).join(delimeter);
+        }
 
         if (command.startsWith(prefix) || dbGuild.settings.disablePrefix) {
-            let arg = content.join(` `);
+            const arg = content;
             command = command.startsWith(prefix) ? command.slice(prefix.length) : command;
 
             // checks if message contains a command and runs it

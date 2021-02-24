@@ -14,12 +14,14 @@ module.exports = (async (client, helpers) => {
         if (arg.length === 0) {
            throw new Error("No argument was provided.");
         }
-        
-        dbGuild.settings.greeting = arg;
+
+        const cleanArg = arg.trim();
+
+        dbGuild.settings.greeting = cleanArg;
         dbGuild.markModified(`settings`);
         await dbGuild.save();
 
-        const embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot greeting message has been changed to \`${arg}\`.`);
+        const embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot greeting message has been changed to:\n\`\`\`${cleanArg}\`\`\``);
         return message.channel.send({ embed });
     };
 

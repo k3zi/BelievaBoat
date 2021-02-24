@@ -21,7 +21,7 @@ module.exports = (async function(client, helpers) {
         dbGuild.markModified(`settings`);
         await dbGuild.save();
 
-        let embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot prefix has been enabled.`);
+        let embed = client.helpers.generateSuccessEmbed(client, message.member.user, `The bot prefix has been disabled.`);
         return message.channel.send({ embed });
     };
 
