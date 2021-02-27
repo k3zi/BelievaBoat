@@ -16,9 +16,9 @@ module.exports = (async function(client, helpers) {
     exports.meta.name = `test`;
     exports.meta.aliases = [];
     exports.meta.description = `Test whether a command or module will work with the current or given user in the current channe or given channel.\n`
-    + '```test <everything | module-name | command-name> (for <user / role / permission> [name | id]) (in <category / channel> [name | id])```';
+    + '```test <everything | module-name | command-name> (for <user>) (in <category / channel> [name | id])```';
     exports.meta.module = 'setup';
-    exports.meta.examples = ['test everything for role @Admin', 'test profile for @Member'];
+    exports.meta.examples = ['test everything for @User', 'test profile for @User'];
 
     exports.run = async (client, message, arg) => {
         let { dbGuild, guild } = message;
