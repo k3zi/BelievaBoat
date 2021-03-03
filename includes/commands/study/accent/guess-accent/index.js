@@ -31,17 +31,6 @@ const accentOutput = (word, accent) => {
     return output;
 };
 
-const accentsForArray = (accents) => {
-    const result = [];
-    for (let accent of accents) {
-        const output = accent.accent.map(a =>
-            accentOutput(a.pronunciation, a.pitchAccent)
-        ).join('・');
-        result.push(` ・[［${accent.accent.map(a => a.pitchAccent).join('・')}］${output}](https://kez.io/nhk/audio/${accent.soundFile})`);
-    }
-    return result;
-};
-
 const accentsForSimpleArray = (accents) => {
     const result = [];
     for (let accent of accents) {
@@ -57,13 +46,11 @@ module.exports = (async function(client, helpers) {
     const exports = {};
 
     exports.meta = {};
-    exports.meta.name = `accent`;
-    exports.meta.aliases = [];
-    exports.meta.description = `Looks up the pitch accent for the specified word via NHK 日本語発音アクセント新辞典（２０１６）.`;
+    exports.meta.name = `guess-accent`;
+    exports.meta.aliases = ['gaccent'];
+    exports.meta.description = `Looks up the pitch accent for the specified word via コツ.`;
     exports.meta.module = 'study';
-    exports.meta.examples = ['accent こんにちは'];
-
-    const nhk = require('./nhk.json');
+    exports.meta.examples = ['guess-accent 昆布茶'];
 
     exports.run = async (client, message, arg) => {
         let { dbGuild, guild } = message;
@@ -78,23 +65,8 @@ module.exports = (async function(client, helpers) {
         }
 
         const word = args[0].trim();
-        const results = nhk.filter(e => e.kana === word || e.kanji.includes(word));
-        let embed = new Discord.MessageEmbed().setTitle("Accent for: " + word).setTimestamp();
-        var combinedAccents = [];
-        for (let result of results) {
-            let i = 0;
-            const accents = [
-                ...(accentsForArray(result.accents)),
-                ...(accentsForSimpleArray(result.conjugations.slice(1))),
-                ...(result.subentries.slice(0, 25).map(e => accentsForArray(e.accents)).flat())
-            ];
-
-            const kanjiOutput = result.kanji.length ? `【 ${result.kanji.join('、')}】` : '';
-            const usageOutput = result.usage ? `（${result.usage}）` : '';
-            combinedAccents.push(`${result.kana}${kanjiOutput}${usageOutput}\n${accents.join('\n')}`);
-        }
-
-        if (client.config.kotuAPIKey && client.config.kotuAPIKey.length > 0 && results.length === 0) {
+        const embed = new Discord.MessageEmbed().setTitle("Accent for: " + word).setTimestamp();
+        if (client.config.kotuAPIKey && client.config.kotuAPIKey.length > 0) {
             const sentenceResponse = await fetch(`https://kotu.io/api/lists/sentence/parse`, {
                 method: 'POST',
                 body: word,
@@ -108,8 +80,6 @@ module.exports = (async function(client, helpers) {
 
             embed.setDescription(`My Guess:\n${output}`);
             embed.setFooter('Drops are indicated by ＼. Phrases are seperated by spaces. Phrases without drops are flat.');
-        } else {
-            embed.setDescription(combinedAccents.join('\n\n'));
         }
 
         embed.setColor(client.helpers.colors.info);
