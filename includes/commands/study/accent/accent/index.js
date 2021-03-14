@@ -96,7 +96,7 @@ module.exports = (async function(client, helpers) {
         }
 
         if (client.config.kotuAPIKey && client.config.kotuAPIKey.length > 0 && results.length === 0) {
-            const sentenceResponse = await fetch(`https://kotu.io/api/lists/sentence/parse`, {
+            const sentenceResponse = await fetch(`https://kotu.io/api/dictionary/parse`, {
                 method: 'POST',
                 body: word,
                 headers: {

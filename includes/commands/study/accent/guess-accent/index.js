@@ -67,7 +67,7 @@ module.exports = (async function(client, helpers) {
         const word = args[0].trim();
         const embed = new Discord.MessageEmbed().setTitle("Accent for: " + word).setTimestamp();
         if (client.config.kotuAPIKey && client.config.kotuAPIKey.length > 0) {
-            const sentenceResponse = await fetch(`https://kotu.io/api/lists/sentence/parse`, {
+            const sentenceResponse = await fetch(`https://kotu.io/api/dictionary/parse`, {
                 method: 'POST',
                 body: word,
                 headers: {
