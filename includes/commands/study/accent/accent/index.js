@@ -80,8 +80,8 @@ module.exports = (async function(client, helpers) {
 
         const word = args[0].trim();
         const results = nhk.filter(e => e.kana === word || e.kanji.includes(word));
-        let embed = new Discord.MessageEmbed().setTitle("Accent for: " + word).setTimestamp();
-        var combinedAccents = [];
+
+        const combinedAccents = [];
         for (let result of results) {
             let i = 0;
             const accents = [
@@ -95,6 +95,10 @@ module.exports = (async function(client, helpers) {
             combinedAccents.push(`${result.kana}${kanjiOutput}${usageOutput}\n${accents.join('\n')}`);
         }
 
+        const title = 'Accent for: ' + word;
+        let output = '';
+        let footer = '';
+
         if (client.config.kotuAPIKey && client.config.kotuAPIKey.length > 0 && results.length === 0) {
             const sentenceResponse = await fetch(`https://kotu.io/api/dictionary/parse`, {
                 method: 'POST',
@@ -107,15 +111,37 @@ module.exports = (async function(client, helpers) {
             const phrases = _.flatten(sentences.map(s => s.accentPhrases));
             const output = phrases.map(p => accentOutput(p.pronunciation, p.pitchAccent.mora)).join('　');
 
-            embed.setDescription(`My Guess:\n${output}`);
-            embed.setFooter('Drops are indicated by ＼. Phrases are seperated by spaces. Phrases without drops are flat.');
+            output = `My Guess:\n${output}`;
+            footer = 'Drops are indicated by ＼. Phrases are seperated by spaces. Phrases without drops are flat.';
         } else {
-            embed.setDescription(combinedAccents.join('\n\n'));
+            output = combinedAccents.join('\n\n');
         }
 
-        embed.setColor(client.helpers.colors.info);
+        if (output.length <= 2048) {
+            const embed = new Discord.MessageEmbed();
+            embed.setTitle(title);
+            embed.setTimestamp();
+            embed.setColor(client.helpers.colors.info);
+            embed.setFooter(footer);
+            return message.channel.send({ embed });
+        }
 
-        return message.channel.send({ embed });
+        const descriptions = [];
+        const lines = output.split('\n');
+        let description = '';
+        while (lines.length > 0) {
+            if ((description.length + lines[0].length) <= 2048) {
+                description += '\n' + lines.shift();
+            } else {
+                descriptions.push(description);
+                description = '';
+            }
+        }
+        if (description.length > 0) {
+            descriptions.push(description);
+        }
+
+        helpers.page(client, message, exports, title, descriptions, footer);
     };
 
     return exports;
