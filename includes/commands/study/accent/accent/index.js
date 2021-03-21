@@ -121,6 +121,7 @@ module.exports = (async function(client, helpers) {
             const embed = new Discord.MessageEmbed();
             embed.setTitle(title);
             embed.setTimestamp();
+            embed.setDescription(output);
             embed.setColor(client.helpers.colors.info);
             embed.setFooter(footer);
             return message.channel.send({ embed });
