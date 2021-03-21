@@ -109,9 +109,9 @@ module.exports = (async function(client, helpers) {
             });
             let sentences = await sentenceResponse.json();
             const phrases = _.flatten(sentences.map(s => s.accentPhrases));
-            const output = phrases.map(p => accentOutput(p.pronunciation, p.pitchAccent.mora)).join('　');
+            const guess = phrases.map(p => accentOutput(p.pronunciation, p.pitchAccent.mora)).join('　');
 
-            output = `My Guess:\n${output}`;
+            output = `My Guess:\n${guess}`;
             footer = 'Drops are indicated by ＼. Phrases are seperated by spaces. Phrases without drops are flat.';
         } else {
             output = combinedAccents.join('\n\n');
