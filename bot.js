@@ -44,6 +44,10 @@ client.loopUntilBotAvailable = async function(guild) {
     return availableBots;
 };
 
+process.on("unhandledRejection", err => {
+    helpers.log('startup', err.stack);
+});
+
 (async () => {
     helpers.log(`startup`, `starting async function`);
 
