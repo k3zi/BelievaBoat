@@ -88,7 +88,7 @@ module.exports = (async function(bot, helpers) {
         });
 
         await Promise.map(guilds, guild => {
-            if (!guild.available) {
+            if (!guild.available || !guild.me || !guild.me.hasPermission("MANAGE_ROLES")) {
                 return;
             }
 
@@ -105,7 +105,7 @@ module.exports = (async function(bot, helpers) {
         });
 
         await Promise.map(voiceChannels, async vc => {
-            if (!vc.guild || !vc.guild.available) {
+            if (!vc.guild || !vc.guild.available || !vc.guild.me || !vc.guild.me.hasPermission("MANAGE_ROLES")) {
                 return;
             }
 
