@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/k3zi/BelievaBoat#readme",
   "dependencies": {
-    "@discordjs/opus": "^0.3.3",
+    "@discordjs/opus": "^0.8.0",
     "akinator-api": "^1.0.1",
     "bluebird": "^3.7.2",
     "dedent": "^0.7.0",
